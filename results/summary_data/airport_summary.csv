@@ -1,0 +1,21 @@
+Airport Code,Airport Name,Region,Total Flights,Average Delay (min),Median Delay (min),Delay Std Dev (min),Delayed Flights (%),Early Flights (%),On-time Flights (%),Busiest Month,Busiest Day
+EGLL,London Heathrow,Europe,560257,18.3,15.03,23.57,86.56,13.4,0.04,3,Thursday
+LFPG,Paris Charles de Gaulle,Europe,582211,8.35,5.77,18.64,70.27,29.66,0.07,6,Thursday
+EHAM,Amsterdam Schiphol,Europe,596418,11.04,7.85,20.81,76.36,23.58,0.06,6,Thursday
+EDDF,Frankfurt,Europe,572933,3.7,1.37,19.6,54.41,45.53,0.06,6,Friday
+LEMD,Madrid Barajas,Europe,476844,6.63,4.68,18.26,66.84,33.1,0.07,6,Friday
+LEBL,Barcelona,Europe,382419,6.53,4.25,16.56,65.59,34.36,0.06,6,Friday
+EDDM,Munich,Europe,445066,3.18,1.43,14.89,55.34,44.6,0.07,6,Friday
+EGKK,London Gatwick,Europe,316268,12.43,9.35,20.84,75.71,24.24,0.05,6,Friday
+LIRF,Rome Fiumicino,Europe,345601,-0.15,-1.65,16.01,44.38,55.56,0.06,6,Friday
+EIDW,Dublin,Europe,266297,1.8,0.2,17.27,50.64,49.3,0.06,6,Friday
+LATI,Tirana,Balkans,36273,4.25,3.55,13.74,63.29,36.62,0.09,6,Friday
+LQSA,Sarajevo,Balkans,14590,5.35,4.23,14.76,64.82,35.0,0.18,6,Friday
+LBSF,Sofia,Balkans,67914,0.62,-0.08,15.12,49.7,50.23,0.07,6,Friday
+LBBG,Burgas,Balkans,22711,0.16,-1.07,16.85,46.26,53.65,0.08,6,Friday
+LDZA,Zagreb,Balkans,51110,2.91,1.87,13.38,57.47,42.48,0.05,6,Friday
+LDSP,Split,Balkans,29676,4.8,3.47,15.34,63.88,36.06,0.06,6,Saturday
+LDDU,Dubrovnik,Balkans,22518,3.36,2.25,14.02,58.78,41.18,0.04,6,Saturday
+BKPR,Pristina,Balkans,21144,4.63,3.42,13.85,61.82,38.11,0.06,6,Saturday
+LYTV,Tivat,Balkans,13840,3.64,2.15,14.3,58.19,41.74,0.07,6,Sunday
+LWSK,Skopje,Balkans,20962,2.15,1.28,15.09,54.26,45.6,0.14,6,Friday

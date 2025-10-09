@@ -1,0 +1,4 @@
+node,out_degree,in_degree,total_degree
+delay_s,1.0,1.0,2.0
+delay_min,1.0,1.0,2.0
+sched_ts,0.0,0.0,0.0

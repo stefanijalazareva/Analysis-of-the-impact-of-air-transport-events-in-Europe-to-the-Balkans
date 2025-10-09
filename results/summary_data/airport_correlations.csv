@@ -1,0 +1,7 @@
+airport1,airport2,correlation
+sched_ts,sched_dt_utc,1.0000000000000262
+delay_s,delay_min,0.9999999999998829
+sched_dt_utc,delay_min,-0.04706054853628682
+delay_s,sched_dt_utc,-0.04706054853628897
+sched_ts,delay_min,-0.04706054853640967
+sched_ts,delay_s,-0.047060548536421755

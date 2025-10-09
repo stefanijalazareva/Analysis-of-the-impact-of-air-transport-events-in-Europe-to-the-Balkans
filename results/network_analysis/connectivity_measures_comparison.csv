@@ -1,0 +1,7 @@
+measure,significant_connections,density,top_nodes
+LC,6,1.0,"sched_ts, delay_s, delay_min"
+RC,6,1.0,"sched_ts, delay_s, delay_min"
+GC,6,1.0,"sched_ts, delay_s, delay_min"
+MI,2,0.3333333333333333,"delay_s, delay_min, sched_ts"
+TE,0,0.0,"sched_ts, delay_s, delay_min"
+COP,0,0.0,"sched_ts, delay_s, delay_min"

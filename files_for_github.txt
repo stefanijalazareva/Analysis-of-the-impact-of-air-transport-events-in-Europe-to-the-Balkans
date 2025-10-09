@@ -1,0 +1,25 @@
+# Essential Scripts and Results for GitHub Repository 
+ 
+## Primary Analysis Scripts: 
+validate_data.py 
+analyze_airports.py 
+network_analysis.py 
+distribution_fitting.py 
+ 
+## Supporting Scripts: 
+load_data.py 
+load_dataframe.py 
+delaynet.py 
+network_metrics.py 
+eda_analysis.py 
+build_timeseries.py 
+detrend_timeseries.py 
+fast_distribution_fitting.py 
+ 
+## Documentation: 
+README.md 
+Meeting_Report_Oct2025.md 
+ 
+## Results folder with all visualizations and data files 
+ 
+## Raw data folder (only if size permits) 
