@@ -51,18 +51,71 @@ def clean_data(data):
     return data
 
 
+def calculate_fit_quality(data, mu, sigma):
+    """
+    Calculate goodness-of-fit metrics for normal distribution.
+
+    Computes various metrics to evaluate how well a normal distribution
+    fits the data, including R² and Mean Squared Error (MSE).
+
+    Args:
+        data (np.ndarray): Delay data
+        mu (float): Mean of fitted normal distribution
+        sigma (float): Standard deviation of fitted normal distribution
+
+    Returns:
+        dict: Dictionary containing R², MSE, and other fit metrics
+    """
+    data = clean_data(data)
+
+    # Calculate histogram for actual data (for comparison purposes)
+    hist, bin_edges = np.histogram(data, bins=50, density=True)
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # Calculate PDF values for the fitted normal at bin centers
+    pdf_fitted = stats.norm.pdf(bin_centers, mu, sigma)
+
+    # Calculate R-squared (coefficient of determination)
+    ss_total = np.sum((hist - np.mean(hist))**2)
+    ss_residual = np.sum((hist - pdf_fitted)**2)
+    r_squared = 1 - (ss_residual / ss_total)
+
+    # Mean Squared Error
+    mse = np.mean((hist - pdf_fitted)**2)
+
+    # Root Mean Squared Error
+    rmse = np.sqrt(mse)
+
+    # Akaike Information Criterion (AIC)
+    n = len(data)
+    k = 2  # number of parameters in normal distribution (mu and sigma)
+    log_likelihood = np.sum(np.log(stats.norm.pdf(data, mu, sigma)))
+    aic = 2 * k - 2 * log_likelihood
+
+    # Calculate KS statistic
+    ks_stat = stats.kstest(data, 'norm', args=(mu, sigma)).statistic
+
+    return {
+        'R²': r_squared,
+        'MSE': mse,
+        'RMSE': rmse,
+        'AIC': aic,
+        'KS': ks_stat
+    }
+
+
 def fit_and_plot_normal(data, airport_name, ax):
     """
-        Fit a normal distribution to the delay data and visualize it.
+    Fit a normal distribution to the delay data and visualize it.
 
-        Args:
-            data (np.ndarray): Delay data.
-            airport_name (str): Airport name for labeling.
-            ax (matplotlib.axes.Axes): Axis on which to draw the plot.
+    Args:
+        data (np.ndarray): Delay data.
+        airport_name (str): Airport name for labeling.
+        ax (matplotlib.axes.Axes): Axis on which to draw the plot.
 
-        Returns:
-            tuple: Estimated mean (μ) and standard deviation (σ).
-        """
+    Returns:
+        tuple: Estimated mean (μ) and standard deviation (σ).
+    """
     data = clean_data(data)
 
     mu, sigma = stats.norm.fit(data)
@@ -153,11 +206,28 @@ def main():
         print("Using the provided CSV file path...")
         df = pd.read_csv("results/summary_data/airport_summary.csv")
 
+    # Map of airport codes to names - expanded to include all airports in the dataset
     airports = {
-        'LWSK': 'Skopje',
-        'EDDF': 'Frankfurt',
-        'LEMD': 'Madrid',  # Using Madrid instead of Munich as it's available in the data
-        'LFPG': 'Paris'  # Using Paris instead of Heathrow as it's available in the data
+        'BKPR': 'Pristina',      # Kosovo
+        'EDDF': 'Frankfurt',     # Germany
+        'EDDM': 'Munich',        # Germany
+        'EGKK': 'London Gatwick', # UK
+        'EGLL': 'London Heathrow', # UK
+        'EHAM': 'Amsterdam',     # Netherlands
+        'EIDW': 'Dublin',        # Ireland
+        'LATI': 'Tirana',        # Albania
+        'LBBG': 'Burgas',        # Bulgaria
+        'LBSF': 'Sofia',         # Bulgaria
+        'LDDU': 'Dubrovnik',     # Croatia
+        'LDSP': 'Split',         # Croatia
+        'LDZA': 'Zagreb',        # Croatia
+        'LEBL': 'Barcelona',     # Spain
+        'LEMD': 'Madrid',        # Spain
+        'LFPG': 'Paris',         # France
+        'LIRF': 'Rome Fiumicino', # Italy
+        'LQSA': 'Sarajevo',      # Bosnia and Herzegovina
+        'LWSK': 'Skopje',        # North Macedonia
+        'LYTV': 'Tivat'          # Montenegro
     }
 
     delay_data = {}
@@ -189,31 +259,230 @@ def main():
             print(f"Warning: Data file for airport {code} not found")
             continue
 
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    axes = axes.flatten()
-
     all_stats = {}
     test_results = {}
+    normal_params = {}
+    fit_qualities = {}
 
+    # Create a grid of subplots for distribution plots - dynamically calculated based on number of airports
+    n_airports = len(delay_data)
+    n_cols = 4  # 4 columns in the grid
+    n_rows = (n_airports + n_cols - 1) // n_cols  # Calculate how many rows we need
+
+    fig_dist, axes_dist = plt.subplots(n_rows, n_cols, figsize=(20, 5 * n_rows))
+    axes_dist = axes_dist.flatten() if n_airports > 1 else [axes_dist]
+
+    # Create grid for Q-Q plots
+    fig_qq, axes_qq = plt.subplots(n_rows, n_cols, figsize=(20, 5 * n_rows))
+    axes_qq = axes_qq.flatten() if n_airports > 1 else [axes_qq]
+
+    # Process each airport's data
     for i, (code, name) in enumerate(airports.items()):
         if code in delay_data:
             print(f"\nAnalyzing delays for {name} ({code})...")
 
             # Fit normal distribution and plot
-            mu, sigma = fit_and_plot_normal(delay_data[code], name, axes[i])
+            if i < len(axes_dist):  # Make sure we don't exceed the number of subplot axes
+                mu, sigma = fit_and_plot_normal(delay_data[code], name, axes_dist[i])
+                normal_params[code] = {'mu': mu, 'sigma': sigma}
 
-            # Calculate descriptive statistics
-            all_stats[code] = calculate_statistics(delay_data[code])
+                # Create Q-Q plot
+                stats.probplot(delay_data[code], dist="norm", plot=axes_qq[i])
+                axes_qq[i].set_title(f"Q-Q Plot: {name}", fontsize=14, fontweight='bold')
 
-            # Conduct normality tests
-            test_results[code] = test_normality(delay_data[code])
+                # Calculate descriptive statistics
+                all_stats[code] = calculate_statistics(delay_data[code])
 
-            print(f"Mean: {all_stats[code]['Mean']:.2f} minutes")
-            print(f"Standard Deviation: {all_stats[code]['Std Dev']:.2f} minutes")
+                # Conduct normality tests
+                test_results[code] = test_normality(delay_data[code])
+
+                # Calculate goodness-of-fit metrics
+                fit_qualities[code] = calculate_fit_quality(delay_data[code], mu, sigma)
+
+                print(f"Mean: {all_stats[code]['Mean']:.2f} minutes")
+                print(f"Standard Deviation: {all_stats[code]['Std Dev']:.2f} minutes")
+                print(f"Goodness-of-Fit (R²): {fit_qualities[code]['R²']:.4f}")
+                print(f"Mean Squared Error (MSE): {fit_qualities[code]['MSE']:.4f}")
+                print(f"Root Mean Squared Error (RMSE): {fit_qualities[code]['RMSE']:.4f}")
+            else:
+                print(f"Warning: Too many airports to visualize all plots for {name}")
+
+    for j in range(i+1, len(axes_dist)):
+        axes_dist[j].set_visible(False)
+    for j in range(i+1, len(axes_qq)):
+        axes_qq[j].set_visible(False)
 
     plt.tight_layout()
-    plt.savefig(f"{OUTPUT_DIR}/delay_distribution_comparison.png", dpi=300)
+    fig_dist.savefig(f"{OUTPUT_DIR}/delay_distribution_comparison.png", dpi=300)
     print(f"\nSaved delay distribution visualization to {OUTPUT_DIR}/delay_distribution_comparison.png")
+
+    plt.tight_layout()
+    fig_qq.savefig(f"{OUTPUT_DIR}/delay_qq_plots_comparison.png", dpi=300)
+    print(f"\nSaved Q-Q plots visualization to {OUTPUT_DIR}/delay_qq_plots_comparison.png")
+
+    print("\n===== NORMAL DISTRIBUTION PARAMETERS =====")
+    params_table = []
+    headers = ["Airport", "Mean (μ)", "Std Dev (σ)", "R²", "RMSE", "KS Statistic"]
+    for code, name in airports.items():
+        if code in normal_params:
+            params_table.append([
+                name,
+                f"{normal_params[code]['mu']:.2f}",
+                f"{normal_params[code]['sigma']:.2f}",
+                f"{fit_qualities[code]['R²']:.4f}",
+                f"{fit_qualities[code]['RMSE']:.4f}",
+                f"{fit_qualities[code]['KS']:.4f}"
+            ])
+    print(tabulate(params_table, headers=headers, tablefmt="grid"))
+
+    params_df = pd.DataFrame({
+        'Airport': [airports[code] for code in normal_params.keys()],
+        'Code': list(normal_params.keys()),
+        'Mean': [normal_params[code]['mu'] for code in normal_params.keys()],
+        'StdDev': [normal_params[code]['sigma'] for code in normal_params.keys()],
+        'R_squared': [fit_qualities[code]['R²'] for code in normal_params.keys()],
+        'RMSE': [fit_qualities[code]['RMSE'] for code in normal_params.keys()],
+        'KS': [fit_qualities[code]['KS'] for code in normal_params.keys()]
+    })
+    params_df.to_csv(f"{OUTPUT_DIR}/normal_distribution_parameters.csv", index=False)
+    print(f"Saved normal distribution parameters to {OUTPUT_DIR}/normal_distribution_parameters.csv")
+
+    region_mapping = {
+        'Balkans': ['BKPR', 'LATI', 'LBBG', 'LBSF', 'LDDU', 'LDSP', 'LDZA', 'LQSA', 'LWSK', 'LYTV'],
+        'Western Europe': ['EDDF', 'EDDM', 'EGKK', 'EGLL', 'EHAM', 'EIDW', 'LEBL', 'LEMD', 'LFPG', 'LIRF']
+    }
+
+    balkan_data = []
+    western_data = []
+
+    for code in normal_params.keys():
+        entry = {
+            'Airport': airports[code],
+            'Code': code,
+            'Mean': normal_params[code]['mu'],
+            'StdDev': normal_params[code]['sigma'],
+            'R²': fit_qualities[code]['R²'],
+            'RMSE': fit_qualities[code]['RMSE']
+        }
+
+        if code in region_mapping['Balkans']:
+            balkan_data.append(entry)
+        else:
+            western_data.append(entry)
+
+    balkan_df = pd.DataFrame(balkan_data)
+    western_df = pd.DataFrame(western_data)
+
+    balkan_df = balkan_df.sort_values(by='Mean')
+    western_df = western_df.sort_values(by='Mean')
+
+    plt.figure(figsize=(14, 8))
+
+    bar_width = 0.4
+    indices_balkan = np.arange(len(balkan_df))
+    indices_western = np.arange(len(western_df))
+
+    plt.subplot(2, 1, 1)
+    balkan_bars = plt.bar(indices_balkan, balkan_df['Mean'], bar_width,
+                         label='Balkan Airports', color='tab:blue', alpha=0.8)
+    plt.xlabel('')
+    plt.ylabel('Mean Delay (minutes)', fontsize=12)
+    plt.title('Mean Delay by Airport (Balkan Region)', fontsize=14, fontweight='bold')
+    plt.xticks(indices_balkan, balkan_df['Airport'], rotation=45, ha='right')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    # Add value labels
+    for i, bar in enumerate(balkan_bars):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 5,
+                f'{height:.1f}', ha='center', va='bottom', fontsize=9)
+
+    plt.subplot(2, 1, 2)
+    western_bars = plt.bar(indices_western, western_df['Mean'], bar_width,
+                         label='Western European Airports', color='tab:red', alpha=0.8)
+    plt.xlabel('Airport', fontsize=12)
+    plt.ylabel('Mean Delay (minutes)', fontsize=12)
+    plt.title('Mean Delay by Airport (Western Europe)', fontsize=14, fontweight='bold')
+    plt.xticks(indices_western, western_df['Airport'], rotation=45, ha='right')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    # Add value labels
+    for i, bar in enumerate(western_bars):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 5,
+                f'{height:.1f}', ha='center', va='bottom', fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig(f"{OUTPUT_DIR}/mean_delay_by_region.png", dpi=300)
+    print(f"\nSaved mean delay comparison by region chart to {OUTPUT_DIR}/mean_delay_by_region.png")
+
+    plt.figure(figsize=(14, 8))
+
+    plt.subplot(2, 1, 1)
+    balkan_bars = plt.bar(indices_balkan, balkan_df['StdDev'], bar_width,
+                          label='Balkan Airports', color='tab:green', alpha=0.8)
+    plt.xlabel('')
+    plt.ylabel('Standard Deviation (minutes)', fontsize=12)
+    plt.title('Delay Standard Deviation by Airport (Balkan Region)', fontsize=14, fontweight='bold')
+    plt.xticks(indices_balkan, balkan_df['Airport'], rotation=45, ha='right')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    # Add value labels
+    for i, bar in enumerate(balkan_bars):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 5,
+                f'{height:.1f}', ha='center', va='bottom', fontsize=9)
+
+    plt.subplot(2, 1, 2)
+    western_bars = plt.bar(indices_western, western_df['StdDev'], bar_width,
+                           label='Western European Airports', color='tab:purple', alpha=0.8)
+    plt.xlabel('Airport', fontsize=12)
+    plt.ylabel('Standard Deviation (minutes)', fontsize=12)
+    plt.title('Delay Standard Deviation by Airport (Western Europe)', fontsize=14, fontweight='bold')
+    plt.xticks(indices_western, western_df['Airport'], rotation=45, ha='right')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for i, bar in enumerate(western_bars):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 5,
+                f'{height:.1f}', ha='center', va='bottom', fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig(f"{OUTPUT_DIR}/std_dev_by_region.png", dpi=300)
+    print(f"Saved standard deviation comparison by region chart to {OUTPUT_DIR}/std_dev_by_region.png")
+
+    plt.figure(figsize=(14, 8))
+
+    plt.subplot(2, 1, 1)
+    balkan_bars = plt.bar(indices_balkan, balkan_df['R²'], bar_width,
+                         color='darkgreen', alpha=0.8)
+    plt.xlabel('')
+    plt.ylabel('R² Value', fontsize=12)
+    plt.title('Normal Distribution Goodness-of-Fit (Balkan Region)', fontsize=14, fontweight='bold')
+    plt.xticks(indices_balkan, balkan_df['Airport'], rotation=45, ha='right')
+    plt.ylim(0.92, 1.0)  # Adjust y-axis to focus on the high R² values
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for i, bar in enumerate(balkan_bars):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 0.001,
+                f'{height:.4f}', ha='center', va='bottom', fontsize=9)
+
+    plt.subplot(2, 1, 2)
+    western_bars = plt.bar(indices_western, western_df['R²'], bar_width,
+                          color='darkmagenta', alpha=0.8)
+    plt.xlabel('Airport', fontsize=12)
+    plt.ylabel('R² Value', fontsize=12)
+    plt.title('Normal Distribution Goodness-of-Fit (Western Europe)', fontsize=14, fontweight='bold')
+    plt.xticks(indices_western, western_df['Airport'], rotation=45, ha='right')
+    plt.ylim(0.92, 1.0)  # Adjust y-axis to focus on the high R² values
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for i, bar in enumerate(western_bars):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 0.001,
+                f'{height:.4f}', ha='center', va='bottom', fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig(f"{OUTPUT_DIR}/r_squared_by_region.png", dpi=300)
+    print(f"Saved goodness-of-fit comparison by region chart to {OUTPUT_DIR}/r_squared_by_region.png")
 
     print("\n===== DESCRIPTIVE STATISTICS =====")
     stats_table = []
@@ -243,20 +512,22 @@ def main():
             ])
     print(tabulate(normality_table, headers=headers, tablefmt="grid"))
 
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    axes = axes.flatten()
-
-    for i, (code, name) in enumerate(airports.items()):
-        if code in delay_data:
-            stats.probplot(delay_data[code], dist="norm", plot=axes[i])
-            axes[i].set_title(f"Q-Q Plot: {name}", fontsize=14, fontweight='bold')
-
-    plt.tight_layout()
-    plt.savefig(f"{OUTPUT_DIR}/delay_qq_plots_comparison.png", dpi=300)
-    print(f"\nSaved Q-Q plots visualization to {OUTPUT_DIR}/delay_qq_plots_comparison.png")
 
     # Create CDF comparison plot
     fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Define region groups with different line styles/colors
+    regions = {
+        'Balkans': ['BKPR', 'LATI', 'LBBG', 'LBSF', 'LDDU', 'LDSP', 'LDZA', 'LQSA', 'LWSK', 'LYTV'],
+        'Western Europe': ['EDDF', 'EDDM', 'EGKK', 'EGLL', 'EHAM', 'EIDW', 'LEBL', 'LEMD', 'LFPG', 'LIRF']
+    }
+
+    # Use different colors for different regions
+    colors = {'Balkans': 'tab:blue', 'Western Europe': 'tab:red'}
+
+    # Place legend outside of plot to avoid overcrowding
+    balkan_line = None
+    western_line = None
 
     for code, name in airports.items():
         if code in delay_data:
@@ -264,13 +535,42 @@ def main():
             sorted_data = np.sort(delay_data[code])
             # Calculate empirical CDF
             y = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
-            # Plot empirical CDF
-            ax.step(sorted_data, y, label=name, linewidth=2)
+
+            # Determine region
+            region = 'Western Europe'  # default
+            for r, codes in regions.items():
+                if code in codes:
+                    region = r
+                    break
+
+            # Plot with thinner lines and region-based color
+            line = ax.step(sorted_data, y, label=name,
+                          linewidth=1.0 if region == 'Western Europe' else 1.5,
+                          alpha=0.7 if region == 'Western Europe' else 0.8,
+                          color=colors[region])
+
+            # Keep track of one line from each region for the legend
+            if region == 'Balkans' and balkan_line is None:
+                balkan_line = line
+            elif region == 'Western Europe' and western_line is None:
+                western_line = line
 
     ax.set_title('Empirical Cumulative Distribution Functions (ECDFs) of Delays', fontsize=16, fontweight='bold')
     ax.set_xlabel('Delay (minutes)', fontsize=14)
     ax.set_ylabel('Cumulative Probability', fontsize=14)
-    ax.legend(fontsize=12)
+
+    # Create custom legend for regions only, not individual airports
+    custom_lines = []
+    custom_labels = []
+
+    if balkan_line is not None:
+        custom_lines.append(plt.Line2D([0], [0], color=colors['Balkans'], lw=2))
+        custom_labels.append('Balkan Airports')
+    if western_line is not None:
+        custom_lines.append(plt.Line2D([0], [0], color=colors['Western Europe'], lw=2))
+        custom_labels.append('Western European Airports')
+
+    ax.legend(custom_lines, custom_labels, fontsize=12, loc='best')
     ax.grid(True)
 
     plt.tight_layout()
@@ -288,6 +588,29 @@ def main():
         f"1. According to the Shapiro-Wilk test, Skopje airport delays {'do' if skopje_normal else 'do not'} follow a normal distribution.")
     print(
         f"2. Among the three major airports analyzed, {major_normal_count} out of 3 have delays that follow a normal distribution.")
+
+    # Add analysis of fit quality metrics
+    print("\nNORMAL DISTRIBUTION FIT QUALITY:")
+    if 'LWSK' in fit_qualities:
+        skopje_r2 = fit_qualities['LWSK']['R²']
+        major_r2_avg = np.mean([fit_qualities[code]['R²'] for code in ['EDDF', 'LEMD', 'LFPG'] if code in fit_qualities])
+
+        print(f"1. Skopje's normal fit has an R² value of {skopje_r2:.4f}, while major airports average {major_r2_avg:.4f}.")
+        if skopje_r2 > major_r2_avg:
+            print("   This indicates the normal distribution explains more of the variation in Skopje's delays")
+            print("   compared to major European airports.")
+        else:
+            print("   This indicates the normal distribution explains less of the variation in Skopje's delays")
+            print("   compared to major European airports.")
+
+        skopje_rmse = fit_qualities['LWSK']['RMSE']
+        major_rmse_avg = np.mean([fit_qualities[code]['RMSE'] for code in ['EDDF', 'LEMD', 'LFPG'] if code in fit_qualities])
+
+        print(f"2. Skopje's fit has a RMSE of {skopje_rmse:.4f}, while major airports average {major_rmse_avg:.4f}.")
+        if skopje_rmse < major_rmse_avg:
+            print("   This suggests a better fit for Skopje with fewer prediction errors compared to major airports.")
+        else:
+            print("   This suggests a worse fit for Skopje with more prediction errors compared to major airports.")
 
     if 'LWSK' in all_stats and all(['EDDF' in all_stats, 'LEMD' in all_stats, 'LFPG' in all_stats]):
         skopje_skew = all_stats['LWSK']['Skewness']
@@ -314,6 +637,32 @@ def main():
         else:
             print("   This suggests Skopje has fewer extreme delays (lighter tails) than major airports.")
 
+    print("\nNORMAL DISTRIBUTION PARAMETERS COMPARISON:")
+    if 'LWSK' in normal_params:
+        skopje_mu = normal_params['LWSK']['mu']
+        major_mu_avg = np.mean([normal_params[code]['mu'] for code in ['EDDF', 'LEMD', 'LFPG'] if code in normal_params])
+
+        print(f"1. Skopje's fitted normal distribution has a mean of {skopje_mu:.2f} minutes,")
+        print(f"   while major airports average {major_mu_avg:.2f} minutes.")
+
+        if skopje_mu < major_mu_avg:
+            print("   This suggests Skopje tends to have shorter delays on average than major European airports.")
+        else:
+            print("   This suggests Skopje tends to have longer delays on average than major European airports.")
+
+        skopje_sigma = normal_params['LWSK']['sigma']
+        major_sigma_avg = np.mean([normal_params[code]['sigma'] for code in ['EDDF', 'LEMD', 'LFPG'] if code in normal_params])
+
+        print(f"2. Skopje's fitted standard deviation is {skopje_sigma:.2f} minutes,")
+        print(f"   while major airports average {major_sigma_avg:.2f} minutes.")
+
+        if skopje_sigma < major_sigma_avg:
+            print("   This indicates Skopje has more consistent and predictable delay patterns")
+            print("   compared to the more variable delays at major European airports.")
+        else:
+            print("   This indicates Skopje has less consistent and less predictable delay patterns")
+            print("   compared to the more stable delays at major European airports.")
+
     print("\nPOSSIBLE REASONS FOR DIFFERENCES:")
     print("1. Traffic Volume: Major airports handle significantly more flights, which may lead to")
     print("   more complex delay patterns and different statistical distributions.")
@@ -330,6 +679,11 @@ def main():
     if skopje_normal and major_normal_count >= 2:
         print("The normal distribution appears to be a reasonable fit for both Skopje and major European")
         print("airports, though with different parameters reflecting their operational differences.")
+
+        if 'LWSK' in fit_qualities:
+            best_airport = max(fit_qualities.items(), key=lambda x: x[1]['R²'])
+            print(f"The best normal distribution fit is observed for {airports[best_airport[0]]}")
+            print(f"with an R² value of {best_airport[1]['R²']:.4f}.")
     elif skopje_normal and major_normal_count < 2:
         print("Interestingly, Skopje's delays fit a normal distribution better than most major European")
         print("airports analyzed, possibly due to its more predictable and less complex operations.")
@@ -339,6 +693,22 @@ def main():
     else:
         print("Neither Skopje nor major European airports show delays that follow a normal distribution,")
         print("though the specific patterns and reasons for non-normality differ between them.")
+
+        if 'LWSK' in fit_qualities:
+            print("\nDespite the statistical rejection of normality (likely due to large sample sizes),")
+            print("the normal distribution may still be a useful approximation. The R² values indicate")
+            print(f"that normal distributions explain {fit_qualities['LWSK']['R²']:.1%} of the variation")
+            print("in Skopje's delays and similar proportions for major airports.")
+
+    print("\n===== SUGGESTIONS FOR FURTHER ANALYSIS =====")
+    print("1. Consider testing additional distribution types (e.g., log-normal, exponential)")
+    print("   that might better capture the observed delay patterns.")
+    print("2. Segment the analysis by time of day, day of week, or season to identify")
+    print("   specific patterns in the delay distributions.")
+    print("3. Incorporate weather data to explore correlations between weather events")
+    print("   and deviations from normal distribution patterns.")
+    print("4. Compare results with additional Balkan regional airports to establish")
+    print("   whether Skopje's patterns are typical for the region.")
 
 
 if __name__ == "__main__":
