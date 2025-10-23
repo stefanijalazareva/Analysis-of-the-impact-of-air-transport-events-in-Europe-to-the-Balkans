@@ -1,0 +1,21 @@
+Airport,Airport Name,Region,df,nc,loc (mean),scale (std),KS Statistic,p-value
+EGLL,London Heathrow,Europe,3.422,1.13,-0.051,12.346,0.0073,0.0
+LFPG,Paris CDG,Europe,3.417,1.181,-6.585,9.649,0.0026,0.001
+EHAM,Amsterdam Schiphol,Europe,3.018,1.193,-4.863,9.699,0.0042,0.0
+EDDF,Frankfurt,Europe,3.662,1.129,-11.731,10.671,0.0062,0.0
+LEMD,Madrid Barajas,Europe,3.671,0.95,-5.238,9.68,0.0034,0.0
+LEBL,Barcelona,Europe,3.568,1.138,-7.244,9.31,0.004,0.0
+EDDM,Munich,Europe,4.407,1.264,-10.955,9.138,0.0054,0.0
+EGKK,London Gatwick,Europe,4.157,1.539,-10.332,11.924,0.0043,0.0
+LIRF,Rome Fiumicino,Europe,4.393,0.926,-11.927,10.329,0.0051,0.0
+EIDW,Dublin,Europe,4.543,0.962,-11.435,11.273,0.0063,0.0
+LATI,Tirana,Balkans,4.467,0.45,-1.142,9.755,0.0043,0.5152
+LQSA,Sarajevo,Balkans,4.124,0.67,-3.095,10.168,0.0048,0.894
+LBSF,Sofia,Balkans,4.09,0.414,-4.725,10.374,0.0047,0.1018
+LBBG,Burgas,Balkans,3.84,0.599,-7.64,10.232,0.0041,0.8344
+LDZA,Zagreb,Balkans,4.218,0.692,-4.916,9.188,0.003,0.7478
+LDSP,Split,Balkans,4.0,0.755,-3.85,9.09,0.003,0.9533
+LDDU,Dubrovnik,Balkans,3.939,0.633,-4.028,9.235,0.0041,0.8349
+BKPR,Pristina,Balkans,5.03,1.022,-7.291,9.84,0.0072,0.2212
+LYTV,Tivat,Balkans,4.544,1.09,-9.052,9.623,0.007,0.5131
+LWSK,Skopje,Balkans,4.971,0.578,-5.485,10.98,0.0065,0.3397
