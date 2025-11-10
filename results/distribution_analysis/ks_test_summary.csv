@@ -1,0 +1,7 @@
+,ks_statistic,ks_statistic,ks_statistic,ks_statistic,p_value,p_value
+,mean,std,min,max,mean,max
+distribution,,,,,,
+gamma,0.7094,0.3709,0.1506,0.9989,0.0,0.0
+lognorm,0.4806,0.3807,0.0587,0.8445,0.0,0.0
+nct,0.0075,0.0053,0.0029,0.0208,0.2071,0.9611
+normal,0.0909,0.0212,0.06,0.133,0.0,0.0
