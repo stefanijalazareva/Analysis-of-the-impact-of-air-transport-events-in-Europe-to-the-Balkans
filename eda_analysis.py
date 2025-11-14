@@ -11,12 +11,13 @@ Outputs:
 - Traffic vs delay scatter plots
 """
 
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
-from load_dataframe import load_cleaned_data
+from data_loader import DataLoader
 
 # Set style for better-looking plots
 plt.style.use('default')  # Use default style instead of seaborn
@@ -28,7 +29,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 # Load the cleaned data
 print("Loading cleaned data...")
-df = load_cleaned_data()
+df = DataLoader().load_processed_data()  # Changed from DataLoader.load_cleaned_data()
 
 # 1. Generate summary statistics for each airport
 print("\nGenerating airport summaries...")

@@ -18,7 +18,7 @@ Output files:
 import pandas as pd
 import json
 from pathlib import Path
-from load_dataframe import load_cleaned_data
+from data_loader import DataLoader
 
 def create_hourly_timeseries(df, output_dir):
     """
@@ -109,7 +109,7 @@ def main():
         pandas.DataFrame: The processed hourly time series with airports as columns
     """
     print("Loading cleaned delay data...")
-    df = load_cleaned_data()
+    df = DataLoader().load_processed_data()  # Changed from load_cleaned_data to load_processed_data
 
     output_dir = Path("data/TimeSeries")
     output_dir.mkdir(parents=True, exist_ok=True)

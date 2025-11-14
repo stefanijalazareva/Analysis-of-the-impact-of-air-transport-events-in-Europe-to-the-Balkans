@@ -1,0 +1,13 @@
+{
+    "total_records": 4845052,
+    "date_range": [
+        "2015-03-01",
+        "2023-06-30"
+    ],
+    "days_with_sufficient_data": 1037,
+    "mean_delay": 7.448798863940641,
+    "median_delay": 4.883333333333334,
+    "std_delay": 19.586400574828296,
+    "min_delay": -929.2333333333333,
+    "max_delay": 1463.0
+}
