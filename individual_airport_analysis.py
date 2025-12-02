@@ -4,9 +4,153 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
+from scipy import stats
+from scipy.stats import (
+    norm, nct, lognorm, gamma, weibull_min, weibull_max, 
+    burr, fisk, gengamma, expon, lomax, invgauss, 
+    beta, pareto, chi2, f, t, dweibull
+)
+import warnings
+warnings.filterwarnings('ignore')
+
+def fit_all_distributions(delays, airport_code, airport_name, delay_type='positive'):
+    """Fit all distributions used across the project and return comprehensive results."""
+    
+    delays_nonzero = delays[delays > 0]
+    if len(delays_nonzero) < 100:
+        print(f"Not enough non-zero {delay_type} delay samples for {airport_code}")
+        return None
+    
+    delays_minutes = delays_nonzero / 60
+    
+    # ALL distributions used across the entire project
+    distributions = [
+        ('Normal', norm),
+        ('Noncentral-t', nct), 
+        ('Log-Normal', lognorm),
+        ('Gamma', gamma),
+        ('Weibull Min', weibull_min),
+        ('Weibull Max', weibull_max),
+        ('Log-Logistic (Fisk)', fisk),
+        ('Burr XII', burr),
+        ('Generalized Gamma', gengamma),
+        ('Exponential', expon),
+        ('Lomax', lomax),
+        ('Inverse Gaussian', invgauss),
+        ('Beta', beta),
+        ('Pareto', pareto),
+        ('Chi-Square', chi2),
+        ('F-Distribution', f),
+        ('T-Distribution', t)
+    ]
+    
+    all_results = []
+    
+    for dist_name, distribution in distributions:
+        try:
+            print(f"  Fitting {dist_name}...")
+            
+            # Handle special cases for parameter fitting
+            if dist_name == 'Beta':
+                # Beta distribution needs data in [0,1]
+                if delays_minutes.max() > 1:
+                    normalized_delays = delays_minutes / delays_minutes.max()
+                    params = distribution.fit(normalized_delays)
+                    ks_stat, p_value = stats.kstest(normalized_delays, distribution.cdf, args=params)
+                    delays_used = normalized_delays
+                else:
+                    params = distribution.fit(delays_minutes)
+                    ks_stat, p_value = stats.kstest(delays_minutes, distribution.cdf, args=params)
+                    delays_used = delays_minutes
+            elif dist_name == 'F-Distribution':
+                params = distribution.fit(delays_minutes)
+                if len(params) >= 2 and params[0] > 0 and params[1] > 0:
+                    ks_stat, p_value = stats.kstest(delays_minutes, distribution.cdf, args=params)
+                    delays_used = delays_minutes
+                else:
+                    continue
+            elif dist_name == 'Chi-Square':
+                params = distribution.fit(delays_minutes)
+                if params[0] > 0:
+                    ks_stat, p_value = stats.kstest(delays_minutes, distribution.cdf, args=params)
+                    delays_used = delays_minutes
+                else:
+                    continue
+            else:
+                params = distribution.fit(delays_minutes)
+                ks_stat, p_value = stats.kstest(delays_minutes, distribution.cdf, args=params)
+                delays_used = delays_minutes
+            
+            # Calculate information criteria
+            try:
+                log_likelihood = np.sum(distribution.logpdf(delays_used, *params))
+                if np.isfinite(log_likelihood):
+                    n = len(delays_used)
+                    k = len(params)
+                    aic = 2 * k - 2 * log_likelihood
+                    bic = k * np.log(n) - 2 * log_likelihood
+                else:
+                    aic = np.inf
+                    bic = np.inf
+            except:
+                aic = np.inf
+                bic = np.inf
+                log_likelihood = -np.inf
+            
+            # Calculate percentiles and statistics
+            try:
+                p90 = distribution.ppf(0.90, *params)
+                p95 = distribution.ppf(0.95, *params)
+                p99 = distribution.ppf(0.99, *params)
+                
+                try:
+                    mean_est = distribution.mean(*params)
+                    var_est = distribution.var(*params)
+                    median_est = distribution.median(*params)
+                except:
+                    mean_est = var_est = np.nan
+                    median_est = distribution.ppf(0.5, *params)
+            except:
+                p90 = p95 = p99 = np.nan
+                mean_est = var_est = median_est = np.nan
+            
+            # Store result
+            result = {
+                'Airport': airport_code,
+                'Airport_Name': airport_name,
+                'Delay_Type': delay_type,
+                'Distribution': dist_name,
+                'Parameters': params,
+                'KS_Statistic': ks_stat,
+                'P_value': p_value,
+                'AIC': aic,
+                'BIC': bic,
+                'Log_Likelihood': log_likelihood,
+                'Mean': mean_est,
+                'Variance': var_est,
+                'Median': median_est,
+                'P90': p90,
+                'P95': p95,
+                'P99': p99,
+                'Sample_Size': len(delays_nonzero),
+                'Data_Mean': np.mean(delays_minutes),
+                'Data_Std': np.std(delays_minutes),
+                'Data_Median': np.median(delays_minutes),
+                'Data_P90': np.percentile(delays_minutes, 90),
+                'Data_P95': np.percentile(delays_minutes, 95),
+                'Data_P99': np.percentile(delays_minutes, 99)
+            }
+            
+            all_results.append(result)
+            
+        except Exception as e:
+            print(f"    Failed to fit {dist_name}: {str(e)}")
+            continue
+    
+    return all_results
 
 def create_individual_airport_reports():
-    """Create focused individual reports for each airport based on existing analysis."""
+    """Create focused individual reports for each airport based on comprehensive analysis."""
 
     # Load the comprehensive results we already generated
     results_file = os.path.join('results', 'new_distributions_analysis', 'all_airports_new_distributions.csv')

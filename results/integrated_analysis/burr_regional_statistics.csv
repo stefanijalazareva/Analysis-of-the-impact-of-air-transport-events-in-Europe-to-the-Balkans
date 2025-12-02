@@ -1,0 +1,5 @@
+,Shape_c,Shape_c,Shape_c,Shape_c,Shape_d,Shape_d,Shape_d,Shape_d,Scale,Scale,Scale,Scale,KS_Statistic,KS_Statistic,KS_Statistic,KS_Statistic,P_value,P_value,P_value,AIC,AIC,P95_Error,P95_Error
+,mean,std,min,max,mean,std,min,max,mean,std,min,max,mean,std,min,max,mean,min,max,mean,std,mean,std
+Region,,,,,,,,,,,,,,,,,,,,,,,
+Balkans,2.8923,0.3368,2.5709,3.7245,0.3334,0.0325,0.251,0.3564,17.0193,1.1613,15.6266,18.7358,0.0111,0.0046,0.0063,0.02,0.1914,0.0,0.6624,116780.4393,59698.7726,0.6187,0.7485
+Europe,2.5942,0.2314,2.2254,3.0888,0.3831,0.0232,0.3625,0.4318,20.4368,4.4674,16.473,30.5053,0.0068,0.0035,0.0033,0.0138,0.0,0.0,0.0001,2236556.1429,975173.1381,0.6585,1.0281
