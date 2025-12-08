@@ -1,0 +1,5 @@
+Burr_Param,NCT_Param,KS_Statistic,p_value
+Burr_c,NCT_df,0.25,0.571336004933722
+Burr_d,NCT_nc,0.45,0.0335416594061465
+Burr_loc,NCT_loc,1.0,1.4508889103849681e-11
+Burr_scale,NCT_scale,1.0,1.4508889103849681e-11
