@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
-from data_loader import DataLoader
+from data_processing.data_loader import DataLoader
 
 # Set style for better-looking plots
 plt.style.use('default')  # Use default style instead of seaborn

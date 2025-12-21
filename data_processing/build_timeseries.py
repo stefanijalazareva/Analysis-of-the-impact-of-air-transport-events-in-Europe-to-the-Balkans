@@ -18,7 +18,7 @@ Output files:
 import pandas as pd
 import json
 from pathlib import Path
-from data_loader import DataLoader
+from data_processing.data_loader import DataLoader
 
 def create_hourly_timeseries(df, output_dir):
     """

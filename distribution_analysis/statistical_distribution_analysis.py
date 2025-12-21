@@ -17,8 +17,8 @@ from scipy.stats import (norm, nct, lognorm, gamma, weibull_min,
                         expon, ks_2samp, kstest)
 from pathlib import Path
 import json
-from data_loader import DataLoader
-from airport_groups import EU_AIRPORTS, BALKAN_AIRPORTS
+from data_processing.data_loader import DataLoader
+from utils.airport_groups import EU_AIRPORTS, BALKAN_AIRPORTS
 import warnings
 from tqdm import tqdm
 from typing import Dict, Tuple, List

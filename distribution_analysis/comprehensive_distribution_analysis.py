@@ -13,7 +13,7 @@ from scipy.stats import (norm, nct, lognorm, gamma, weibull_min,
                         expon, ks_2samp, kstest)
 from pathlib import Path
 import json
-from data_loader import DataLoader
+from data_processing.data_loader import DataLoader
 from typing import Dict, List, Tuple
 import warnings
 from tqdm import tqdm

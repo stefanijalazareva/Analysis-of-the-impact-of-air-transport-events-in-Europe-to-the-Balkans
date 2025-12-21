@@ -1,8 +1,8 @@
 """
 Fast distribution analysis focusing on Normal and NCT fits
 """
-from statistical_distribution_analysis import DistributionAnalyzer
-from data_loader import DataLoader
+from distribution_analysis.statistical_distribution_analysis import DistributionAnalyzer
+from data_processing.data_loader import DataLoader
 import numpy as np
 
 def main():
