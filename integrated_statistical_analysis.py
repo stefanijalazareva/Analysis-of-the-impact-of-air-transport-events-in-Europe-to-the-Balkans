@@ -236,22 +236,6 @@ Based on KS test results:
 - **Noncentral-t**: Good performance, especially for Balkan airports
 - **Normal distribution**: Poor fit for delay data (high KS statistics)
 
-## Recommendations
-
-1. **Operational Use**: Implement Burr XII distribution for delay forecasting systems
-2. **Model Validation**: Regular parameter updates with new data
-3. **Regional Considerations**: Account for regional parameter differences in network models
-4. **Extreme Event Planning**: Use 95th and 99th percentile estimates for crisis management
-
-## Technical Notes
-
-- All analyses based on positive delays only (delays > 0 minutes)
-- Parameters estimated using maximum likelihood estimation
-- Goodness of fit assessed using Kolmogorov-Smirnov tests
-- Regional classifications based on geographic and operational similarities
-
----
-*This analysis integrates findings from comprehensive distribution fitting across 20 major European and Balkan airports.*
 """
         
         # Save the report
@@ -365,8 +349,6 @@ Based on KS test results:
         
         discrepancy_report = f"""# Statistical Model Comparison: NCT vs Burr XII
 
-**Analysis Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-
 ## Overview of Discrepancies
 
 This analysis examines the differences between Noncentral-t (NCT) and Burr XII distribution fits across all airports to explain observed inconsistencies.
@@ -406,61 +388,6 @@ Aviation delay data exhibits:
 - Zero inflation (on-time flights)
 - Operational constraints (minimum delay reporting thresholds)
 
-### 4. Heatmap vs Individual Report Differences
-
-The discrepancies between heatmap visualizations and individual reports stem from:
-
-1. **Different Analysis Timeframes**: 
-   - Heatmaps may use aggregated historical data
-   - Individual reports use specific time periods
-
-2. **Preprocessing Differences**:
-   - Different outlier removal methods
-   - Varying minimum delay thresholds
-   - Alternative data cleaning procedures
-
-3. **Parameter Estimation Methods**:
-   - Maximum likelihood vs method of moments
-   - Different optimization algorithms
-   - Convergence criteria variations
-
-4. **Statistical Test Implementation**:
-   - KS test parameter specifications
-   - Handling of tied values
-   - Bootstrap vs analytical p-values
-
-## Recommendations
-
-### 1. For Operational Use
-- Use **Burr XII** for extreme delay prediction (better tail modeling)
-- Use **NCT** for central tendency analysis (better symmetric properties)
-
-### 2. For Research Consistency
-- Standardize preprocessing procedures across analyses
-- Document all parameter estimation methods
-- Use consistent statistical test implementations
-
-### 3. For Report Accuracy
-- Cross-validate results across multiple analysis methods
-- Include confidence intervals for all parameter estimates
-- Report methodology details for reproducibility
-
-## Technical Considerations
-
-### Distribution Selection Criteria
-1. **Goodness of fit**: KS statistic magnitude
-2. **Statistical significance**: P-value interpretation
-3. **Practical utility**: Parameter interpretability
-4. **Theoretical justification**: Match to data generation process
-
-### Methodological Notes
-- All comparisons based on positive delays only
-- KS statistics computed using same data preprocessing
-- Regional classifications maintained consistently
-- Sample sizes vary significantly across airports
-
----
-*This analysis helps explain observed discrepancies and provides guidance for consistent statistical modeling in aviation delay research.*
 """
         
         with open(self.output_path / 'discrepancy_analysis_report.md', 'w') as f:
@@ -536,7 +463,8 @@ This section integrates results from multiple distribution analyses to provide a
         
         if burr_data is not None:
             enhancement += f"""
-#### Burr XII Distribution (Recommended)
+#### Burr XII Distribution
+
 **Parameters:**
 - Shape c: {burr_data['Shape_c']:.3f}
 - Shape d: {burr_data['Shape_d']:.3f}  
@@ -559,7 +487,7 @@ This section integrates results from multiple distribution analyses to provide a
 
         if nct_data is not None:
             enhancement += f"""
-#### Noncentral-t Distribution (Alternative)
+#### Noncentral-t Distribution 
 **Parameters:**
 - Degrees of freedom: {nct_data['df']:.3f}
 - Non-centrality: {nct_data['nc']:.3f}
@@ -581,10 +509,6 @@ This section integrates results from multiple distribution analyses to provide a
 - **Burr XII advantages:** Better tail modeling, industry standard
 - **NCT advantages:** Symmetric flexibility, mathematical tractability
 
-#### Practical Recommendations
-- **Operational forecasting:** Use Burr XII for delay prediction systems
-- **Risk analysis:** Burr XII percentiles for capacity planning  
-- **Research applications:** Both models provide valuable insights
 """
 
         enhancement += f"""
@@ -743,13 +667,11 @@ This airport's statistical characteristics align with typical patterns observed 
         
         master_report = f"""# Integrated Statistical Analysis - Master Report
 
-**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Analysis Scope:** 20 European and Balkan Airports
-**Integration Status:** Complete
 
 ## Executive Summary
 
-This master report integrates all statistical analyses conducted on aviation delay data, combining:
+This report integrates all statistical analyses conducted on aviation delay data, combining:
 - Burr XII distribution analysis (primary model)
 - Noncentral-t distribution analysis (colleague's work)
 - Kolmogorov-Smirnov test validations
@@ -823,8 +745,6 @@ Inconsistencies between heatmap and individual reports explained by:
 3. **Extended Validation**: Include more distribution families
 4. **Operational Implementation**: Deploy integrated models in production
 
----
-*This integrated analysis provides a comprehensive foundation for aviation delay modeling and operational decision-making.*
 """
         
         with open(self.output_path / 'master_integration_report.md', 'w') as f:
