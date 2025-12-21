@@ -6,15 +6,19 @@ various detrending methods to make the data stationary by removing
 daily patterns and other trends.
 """
 
+import sys
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 import logging
 import seaborn as sns
 import warnings
 import os
 import traceback
+
+# Add parent directory to path to import local delaynet module
+sys.path.insert(0, str(Path(__file__).parent.parent))
 import delaynet as dn
 
 warnings.filterwarnings('ignore')
