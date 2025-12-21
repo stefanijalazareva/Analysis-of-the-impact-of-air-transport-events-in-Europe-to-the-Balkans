@@ -15,91 +15,79 @@ import seaborn as sns
 import warnings
 import os
 import traceback
-
-# Import our delaynet module
 import delaynet as dn
 
-"""
-Suppress warnings to make output cleaner
-"""
 warnings.filterwarnings('ignore')
 
-"""
-Configure logging with both file and console output
-"""
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('timeseries_analysis.log'),  # Use existing log file
+        logging.FileHandler('timeseries_analysis.log'),
         logging.StreamHandler()
     ]
 )
 
 def load_data():
     """
-    Load the processed delay time series data.
+    Load the filled hourly time series data prepared for network analysis.
 
     Returns:
-        pandas.DataFrame: DataFrame containing the delay time series
+        pandas.DataFrame: DataFrame containing the hourly delay time series (all gaps filled)
     """
-    data_path = Path("data/ProcessedData/cleaned_delays.parquet")
-    logging.info(f"Loading data from {data_path}")
+    data_path = Path("data/TimeSeries/hourly_delays.csv")
+    logging.info(f"Loading filled hourly time series from {data_path}")
 
     if not data_path.exists():
-        raise FileNotFoundError(f"Data file not found: {data_path}")
+        raise FileNotFoundError(
+            f"Data file not found: {data_path}\n"
+            "Please run 'python -m data_processing.build_timeseries' first to create the filled time series."
+        )
 
-    df = pd.read_parquet(data_path)
-
-    # Ensure the index is datetime
-    if not isinstance(df.index, pd.DatetimeIndex):
-        if 'sched_dt' in df.columns:
-            df['sched_dt'] = pd.to_datetime(df['sched_dt'])
-            df = df.set_index('sched_dt')
-        else:
-            # If no datetime column is found, use the existing index
-            logging.warning("No datetime column found. Using existing index.")
+    df = pd.read_csv(data_path, index_col=0)
+    
+    # Convert index to datetime (handle timezone-aware strings from CSV)
+    df.index = pd.to_datetime(df.index, utc=True).tz_localize(None)
 
     logging.info(f"Loaded data shape: {df.shape}")
     logging.info(f"Data timespan: {df.index.min()} to {df.index.max()}")
-    logging.info(f"Columns: {df.columns.tolist()}")
+    logging.info(f"Airports (columns): {df.columns.tolist()}")
+    
+    missing = df.isnull().sum().sum()
+    if missing > 0:
+        logging.warning(f"Found {missing} missing values in filled time series!")
+    else:
+        logging.info("No missing values - data is ready for network analysis")
 
     return df
 
 def prepare_data_for_detrending(df):
     """
-    Prepare data for detrending by selecting only numeric columns.
+    Prepare filled hourly time series data for detrending.
+    
+    The data should already be in the correct format from build_timeseries.py:
+    - Columns are airports
+    - Rows are hourly timestamps
+    - All missing values filled
 
     Args:
-        df: DataFrame with delay time series
+        df: DataFrame with hourly delay time series (airports as columns)
 
     Returns:
-        numpy.ndarray: Array with shape (n_nodes, n_times)
-        list: Column names corresponding to nodes
+        numpy.ndarray: Array with shape (n_nodes, n_times) where nodes are airports
+        list: Airport codes (column names corresponding to nodes)
     """
-    # Select only numeric columns
-    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
-    logging.info(f"Found {len(numeric_cols)} numeric columns: {numeric_cols[:5]}..." if len(numeric_cols) > 5 else numeric_cols)
+    nodes = df.columns.tolist()
+    ts_array = df.values.T
 
-    if not numeric_cols:
-        logging.warning("No numeric columns found. Attempting to convert columns.")
-        numeric_df = df.apply(pd.to_numeric, errors='coerce')
-        numeric_cols = numeric_df.columns[~numeric_df.isna().all()].tolist()
+    logging.info(f"Prepared array shape: {ts_array.shape} ({len(nodes)} airports × {ts_array.shape[1]} time steps)")
+
+    nan_count = np.isnan(ts_array).sum()
+    if nan_count > 0:
+        logging.warning(f"Array contains {nan_count} NaN values ({np.isnan(ts_array).mean() * 100:.2f}%)")
+        logging.warning("This should not happen - time series should be fully filled!")
     else:
-        numeric_df = df[numeric_cols]
-
-    # Drop columns with all NaN values
-    numeric_df = numeric_df.dropna(axis=1, how='all')
-
-    # Get column names (nodes) and transpose data to nodes × times format
-    nodes = numeric_df.columns.tolist()
-    ts_array = numeric_df.values.T  # Transpose to get (n_nodes, n_times)
-
-    logging.info(f"Prepared array shape: {ts_array.shape}")
-
-    # Handle NaN values in the array
-    nan_percentage = np.isnan(ts_array).mean() * 100
-    logging.info(f"Array contains {nan_percentage:.2f}% NaN values")
+        logging.info("Array contains no NaN values - ready for detrending")
 
     return ts_array, nodes
 
@@ -114,11 +102,9 @@ def visualize_detrending_comparison(original, detrended_dict, nodes, output_dir)
         output_dir: Directory to save visualization outputs
     """
     try:
-        # Create output directory
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Select a sample node to visualize (use the first node with non-NaN data)
         sample_idx = 0
         found_valid = False
 
@@ -134,10 +120,8 @@ def visualize_detrending_comparison(original, detrended_dict, nodes, output_dir)
         sample_node = nodes[sample_idx]
         logging.info(f"Visualizing detrending methods for sample node: {sample_node}")
 
-        # Select a sample time window (24 * 7 hours = 1 week)
         window_size = 24 * 7
         if original.shape[1] > window_size:
-            # Find a window with minimal NaN values
             best_start = 0
             min_nans = float('inf')
 
@@ -153,15 +137,12 @@ def visualize_detrending_comparison(original, detrended_dict, nodes, output_dir)
             start_idx = 0
             end_idx = original.shape[1]
 
-        # Create a figure with subplots for original and each detrending method
         n_methods = len(detrended_dict) + 1  # +1 for original
         fig, axes = plt.subplots(n_methods, 1, figsize=(12, 3 * n_methods), sharex=True)
 
-        # Handle case with only one subplot
         if n_methods == 1:
             axes = [axes]
 
-        # Plot original data
         valid_mask = ~np.isnan(original[sample_idx, start_idx:end_idx])
         time_indices = np.arange(start_idx, end_idx)[valid_mask]
         valid_data = original[sample_idx, start_idx:end_idx][valid_mask]
@@ -170,7 +151,6 @@ def visualize_detrending_comparison(original, detrended_dict, nodes, output_dir)
         axes[0].set_title(f"Original - {sample_node}")
         axes[0].set_ylabel("Delay")
 
-        # Plot each detrending method
         for i, (method, data) in enumerate(detrended_dict.items(), start=1):
             valid_mask = ~np.isnan(data[sample_idx, start_idx:end_idx])
             time_indices = np.arange(start_idx, end_idx)[valid_mask]
@@ -185,20 +165,16 @@ def visualize_detrending_comparison(original, detrended_dict, nodes, output_dir)
         plt.savefig(output_dir / f"detrending_comparison_{sample_node}.png", dpi=300, bbox_inches='tight')
         plt.close()
 
-        # Create distribution plots to compare detrending methods
         fig, axes = plt.subplots(1, n_methods, figsize=(4 * n_methods, 4))
 
-        # Handle case with only one subplot
         if n_methods == 1:
             axes = [axes]
 
-        # Original distribution - filter out NaNs
         valid_data = original[sample_idx, :][~np.isnan(original[sample_idx, :])]
         if len(valid_data) > 0:
             sns.histplot(valid_data, kde=True, ax=axes[0])
             axes[0].set_title(f"Original Distribution\n{sample_node}")
 
-        # Detrended distributions
         for i, (method, data) in enumerate(detrended_dict.items(), start=1):
             valid_data = data[sample_idx, :][~np.isnan(data[sample_idx, :])]
             if len(valid_data) > 0:
@@ -213,7 +189,6 @@ def visualize_detrending_comparison(original, detrended_dict, nodes, output_dir)
 
     except Exception as e:
         logging.error(f"Error during visualization: {str(e)}")
-        # Continue execution even if visualization fails
 
 def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir):
     """
@@ -231,10 +206,8 @@ def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir
 
         logging.info("Checking stationarity of time series...")
 
-        # Check stationarity for original data
         orig_stationary, orig_pvals = dn.check_stationarity(original)
 
-        # Check stationarity for each detrending method
         stationary_results = {
             'original': orig_stationary,
         }
@@ -250,11 +223,9 @@ def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir
                 pvalue_results[method] = pval
             except Exception as e:
                 logging.error(f"Error checking stationarity for {method}: {str(e)}")
-                # Create placeholder arrays with all False and p-value of 1.0
                 stationary_results[method] = np.zeros_like(orig_stationary, dtype=bool)
                 pvalue_results[method] = np.ones_like(orig_pvals)
 
-        # Create summary DataFrame
         summary_data = {
             'node': nodes,
             'original_stationary': orig_stationary,
@@ -268,7 +239,6 @@ def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir
 
         summary_df = pd.DataFrame(summary_data)
 
-        # Calculate percentage of stationary series for each method
         stationary_percentages = {
             method: np.mean(results) * 100 for method, results in stationary_results.items()
         }
@@ -277,7 +247,6 @@ def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir
         for method, percentage in stationary_percentages.items():
             logging.info(f"  {method}: {percentage:.1f}% stationary")
 
-        # Create visualization of stationarity improvement
         plt.figure(figsize=(10, 6))
         plt.bar(stationary_percentages.keys(), stationary_percentages.values())
         plt.title('Percentage of Stationary Time Series by Detrending Method')
@@ -285,7 +254,6 @@ def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir
         plt.ylim([0, 100])
         plt.grid(axis='y', linestyle='--', alpha=0.7)
 
-        # Add percentage labels on bars
         for i, (method, percentage) in enumerate(stationary_percentages.items()):
             plt.text(i, percentage + 2, f"{percentage:.1f}%", ha='center')
 
@@ -293,14 +261,12 @@ def check_and_visualize_stationarity(original, detrended_dict, nodes, output_dir
         plt.savefig(output_dir / "stationarity_comparison.png", dpi=300, bbox_inches='tight')
         plt.close()
 
-        # Save summary to CSV
         summary_df.to_csv(output_dir / "stationarity_summary.csv", index=False)
 
         return summary_df
 
     except Exception as e:
         logging.error(f"Error during stationarity analysis: {str(e)}")
-        # Continue execution even if stationarity check fails
         return pd.DataFrame({'error': ['Stationarity check failed']})
 
 def save_detrended_data(detrended_dict, nodes, index, output_dir):
@@ -318,10 +284,8 @@ def save_detrended_data(detrended_dict, nodes, index, output_dir):
 
     for method, data in detrended_dict.items():
         try:
-            # Create DataFrame from detrended array
             df = pd.DataFrame(data.T, columns=nodes, index=index[:data.shape[1]])
 
-            # Save as parquet file
             output_file = output_dir / f"detrended_{method}.parquet"
             df.to_parquet(output_file)
             logging.info(f"Saved detrended data ({method}) to {output_file}")
@@ -335,40 +299,35 @@ def main():
     try:
         logging.info("Starting detrending process...")
 
-        # Load delay time series data
         df = load_data()
 
-        # Prepare data for detrending
         ts_array, nodes = prepare_data_for_detrending(df)
 
-        # Save the original index for later use
         original_index = df.index
 
-        # Apply different detrending methods
         methods = ['delta', 'delta2', 'zs', 'linear']
         logging.info(f"Applying detrending methods: {', '.join(methods)}")
+        logging.info("  - delta: First-order differencing (local mean subtraction)")
+        logging.info("  - delta2: Second-order differencing")
+        logging.info("  - zs: Z-score normalization with daily periodicity (24 hours)")
+        logging.info("  - linear: Linear detrending using scipy.signal.detrend")
 
-        # Apply detrending methods with comparison
         detrended_results = dn.compare_detrending_methods(
             ts_array,
             methods=methods,
-            periodicity=24,  # Assuming hourly data with daily patterns
-            axis=1  # Detrend along time axis
+            periodicity=24,
+            axis=1
         )
 
-        # Create output directory
         output_dir = Path("data/DetrendedData")
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Visualize the results
         visualize_detrending_comparison(ts_array, detrended_results, nodes, output_dir)
 
-        # Check stationarity
         stationarity_summary = check_and_visualize_stationarity(
             ts_array, detrended_results, nodes, output_dir
         )
 
-        # Save detrended data for further analysis
         save_detrended_data(detrended_results, nodes, original_index, output_dir)
 
         logging.info("Detrending process completed successfully!")
