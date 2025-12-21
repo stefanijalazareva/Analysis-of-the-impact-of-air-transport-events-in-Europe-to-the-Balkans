@@ -2,28 +2,6 @@
   "start_time": "2015-03-01T01:00:00+01:00",
   "end_time": "2023-07-01T00:00:00+02:00",
   "total_hours": 73055,
-  "missing_values_before_interpolation": {
-    "BKPR": 46295,
-    "EDDF": 45973,
-    "EDDM": 45938,
-    "EGKK": 45958,
-    "EGLL": 46008,
-    "EHAM": 45891,
-    "EIDW": 45877,
-    "LATI": 46015,
-    "LBBG": 48018,
-    "LBSF": 45972,
-    "LDDU": 46463,
-    "LDSP": 46305,
-    "LDZA": 46037,
-    "LEBL": 45886,
-    "LEMD": 45888,
-    "LFPG": 45855,
-    "LIRF": 45885,
-    "LQSA": 46156,
-    "LWSK": 46053,
-    "LYTV": 46619
-  },
   "airports": [
     "BKPR",
     "EDDF",
@@ -46,48 +24,195 @@
     "LWSK",
     "LYTV"
   ],
+  "imputation_method": "forward_fill -> backward_fill -> time_interpolation (all gaps filled)",
+  "missing_values_before_imputation": {
+    "BKPR": 60650,
+    "EDDF": 52645,
+    "EDDM": 52161,
+    "EGKK": 51295,
+    "EGLL": 52672,
+    "EHAM": 49302,
+    "EIDW": 50017,
+    "LATI": 56993,
+    "LBBG": 64046,
+    "LBSF": 53424,
+    "LDDU": 63372,
+    "LDSP": 61916,
+    "LDZA": 56450,
+    "LEBL": 50153,
+    "LEMD": 49574,
+    "LFPG": 49286,
+    "LIRF": 50298,
+    "LQSA": 63597,
+    "LWSK": 60214,
+    "LYTV": 65633
+  },
+  "missing_values_after_imputation": {
+    "BKPR": 0,
+    "EDDF": 0,
+    "EDDM": 0,
+    "EGKK": 0,
+    "EGLL": 0,
+    "EHAM": 0,
+    "EIDW": 0,
+    "LATI": 0,
+    "LBBG": 0,
+    "LBSF": 0,
+    "LDDU": 0,
+    "LDSP": 0,
+    "LDZA": 0,
+    "LEBL": 0,
+    "LEMD": 0,
+    "LFPG": 0,
+    "LIRF": 0,
+    "LQSA": 0,
+    "LWSK": 0,
+    "LYTV": 0
+  },
+  "imputation_statistics": {
+    "BKPR": {
+      "original_values": 12405,
+      "imputed_values": 60650,
+      "imputation_percentage": 83.02
+    },
+    "EDDF": {
+      "original_values": 20410,
+      "imputed_values": 52645,
+      "imputation_percentage": 72.06
+    },
+    "EDDM": {
+      "original_values": 20894,
+      "imputed_values": 52161,
+      "imputation_percentage": 71.4
+    },
+    "EGKK": {
+      "original_values": 21760,
+      "imputed_values": 51295,
+      "imputation_percentage": 70.21
+    },
+    "EGLL": {
+      "original_values": 20383,
+      "imputed_values": 52672,
+      "imputation_percentage": 72.1
+    },
+    "EHAM": {
+      "original_values": 23753,
+      "imputed_values": 49302,
+      "imputation_percentage": 67.49
+    },
+    "EIDW": {
+      "original_values": 23038,
+      "imputed_values": 50017,
+      "imputation_percentage": 68.46
+    },
+    "LATI": {
+      "original_values": 16062,
+      "imputed_values": 56993,
+      "imputation_percentage": 78.01
+    },
+    "LBBG": {
+      "original_values": 9009,
+      "imputed_values": 64046,
+      "imputation_percentage": 87.67
+    },
+    "LBSF": {
+      "original_values": 19631,
+      "imputed_values": 53424,
+      "imputation_percentage": 73.13
+    },
+    "LDDU": {
+      "original_values": 9683,
+      "imputed_values": 63372,
+      "imputation_percentage": 86.75
+    },
+    "LDSP": {
+      "original_values": 11139,
+      "imputed_values": 61916,
+      "imputation_percentage": 84.75
+    },
+    "LDZA": {
+      "original_values": 16605,
+      "imputed_values": 56450,
+      "imputation_percentage": 77.27
+    },
+    "LEBL": {
+      "original_values": 22902,
+      "imputed_values": 50153,
+      "imputation_percentage": 68.65
+    },
+    "LEMD": {
+      "original_values": 23481,
+      "imputed_values": 49574,
+      "imputation_percentage": 67.86
+    },
+    "LFPG": {
+      "original_values": 23769,
+      "imputed_values": 49286,
+      "imputation_percentage": 67.46
+    },
+    "LIRF": {
+      "original_values": 22757,
+      "imputed_values": 50298,
+      "imputation_percentage": 68.85
+    },
+    "LQSA": {
+      "original_values": 9458,
+      "imputed_values": 63597,
+      "imputation_percentage": 87.05
+    },
+    "LWSK": {
+      "original_values": 12841,
+      "imputed_values": 60214,
+      "imputation_percentage": 82.42
+    },
+    "LYTV": {
+      "original_values": 7422,
+      "imputed_values": 65633,
+      "imputation_percentage": 89.84
+    }
+  },
   "mean_delays": {
-    "BKPR": 3.088714523465904,
-    "EDDF": 0.07556842372216406,
-    "EDDM": -0.009636280837132416,
-    "EGKK": 6.908901855025039,
-    "EGLL": 10.04715826563407,
-    "EHAM": 7.947292259366652,
-    "EIDW": -0.8073469372447137,
-    "LATI": 2.0421443450096115,
-    "LBBG": -0.4518348724539065,
-    "LBSF": -0.883110356684524,
-    "LDDU": 1.1147237861815589,
-    "LDSP": 2.2281778295156474,
-    "LDZA": 2.3779054906768007,
-    "LEBL": 2.5879199298245488,
-    "LEMD": 3.2380063994344943,
-    "LFPG": 4.747247446354767,
-    "LIRF": -2.5612391548291673,
-    "LQSA": 3.6302682129775166,
-    "LWSK": -0.8002735806470647,
-    "LYTV": -0.08323682579300495
+    "BKPR": 4.4193,
+    "EDDF": -4.4833,
+    "EDDM": -14.2484,
+    "EGKK": -1.8361,
+    "EGLL": -8.153,
+    "EHAM": 0.584,
+    "EIDW": -8.3089,
+    "LATI": -2.8783,
+    "LBBG": -0.4302,
+    "LBSF": -1.8887,
+    "LDDU": -2.3142,
+    "LDSP": 1.9344,
+    "LDZA": 6.0371,
+    "LEBL": -1.7011,
+    "LEMD": -4.0272,
+    "LFPG": -15.4237,
+    "LIRF": -7.9392,
+    "LQSA": 0.998,
+    "LWSK": -3.9606,
+    "LYTV": 0.2157
   },
   "std_delays": {
-    "BKPR": 12.605458584832727,
-    "EDDF": 23.783574623878174,
-    "EDDM": 29.179906446157013,
-    "EGKK": 15.713978515974604,
-    "EGLL": 38.22318511263894,
-    "EHAM": 13.960276082716817,
-    "EIDW": 12.527290719900755,
-    "LATI": 11.292453402578488,
-    "LBBG": 29.679013920255972,
-    "LBSF": 12.31617895448041,
-    "LDDU": 13.802501522696392,
-    "LDSP": 12.075076765691707,
-    "LDZA": 10.47759192769563,
-    "LEBL": 10.600728792128702,
-    "LEMD": 12.213320920932809,
-    "LFPG": 29.79302275092384,
-    "LIRF": 11.282181321015917,
-    "LQSA": 14.558287785473464,
-    "LWSK": 13.902251764915352,
-    "LYTV": 11.372739136122489
+    "BKPR": 13.3738,
+    "EDDF": 16.3464,
+    "EDDM": 83.4349,
+    "EGKK": 15.5177,
+    "EGLL": 72.6902,
+    "EHAM": 20.5995,
+    "EIDW": 13.4875,
+    "LATI": 12.1246,
+    "LBBG": 21.478,
+    "LBSF": 13.9012,
+    "LDDU": 12.7708,
+    "LDSP": 10.9333,
+    "LDZA": 13.3919,
+    "LEBL": 10.6324,
+    "LEMD": 15.0799,
+    "LFPG": 90.2052,
+    "LIRF": 11.2018,
+    "LQSA": 11.9775,
+    "LWSK": 17.1443,
+    "LYTV": 12.1184
   }
 }

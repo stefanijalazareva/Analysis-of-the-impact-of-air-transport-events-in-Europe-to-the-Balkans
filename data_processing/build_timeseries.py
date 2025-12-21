@@ -6,13 +6,14 @@ which is required for network analysis and connectivity metrics.
 
 The module performs the following operations:
 - Resampling to hourly frequency
-- Handling of missing values through forward/backward filling and interpolation
-- Time alignment across all airports
+- Handling of ALL missing values through forward/backward filling and time-based interpolation
+- Time alignment across all airports (creates complete continuous time grid)
 - Data validation and quality checks
+- Imputation tracking to distinguish original vs. filled values
 
 Output files:
-- hourly_delays.csv: Contains the hourly resampled delay data
-- timeseries_quality.json: Contains data quality metrics and validation results
+- hourly_delays.csv: Contains the hourly resampled delay data (all gaps filled)
+- timeseries_quality.json: Contains data quality metrics, validation results, and imputation statistics
 """
 
 import pandas as pd
@@ -27,15 +28,19 @@ def create_hourly_timeseries(df, output_dir):
     This function performs the following steps:
     1. Creates a pivot table with airports as columns
     2. Resamples the data to hourly frequency
-    3. Handles missing values through forward/backward filling and interpolation
-    4. Saves the processed data and generates a quality report
+    3. Handles ALL missing values through forward/backward filling and time-based interpolation
+    4. Tracks imputation statistics (original vs filled values)
+    5. Saves the processed data and generates a quality report
+
+    Note: All gaps are filled to ensure compatibility with network analysis methods
+    that require complete continuous time series (Granger causality, transfer entropy, etc.)
 
     Args:
         df (pandas.DataFrame): Input DataFrame with delay data
         output_dir (pathlib.Path): Directory to save output files
 
     Returns:
-        pandas.DataFrame: Processed hourly time series with airports as columns
+        pandas.DataFrame: Processed hourly time series with airports as columns (all gaps filled)
     """
     print("Creating hourly time series...")
 
@@ -45,22 +50,51 @@ def create_hourly_timeseries(df, output_dir):
                            aggfunc='mean')
             .resample('1h').mean())
 
-    # Handle missing values with a 24-hour window for each method
-    pivot = (pivot
-             .ffill(limit=24)
-             .bfill(limit=24)
-             .interpolate(method='time', limit=24))
+    # Track missing values before imputation
+    missing_before = pivot.isnull().sum().to_dict()
+    total_hours = len(pivot)
+    
+    print(f"Total hours in time series: {total_hours}")
+    print(f"Missing values before imputation: {sum(missing_before.values())} ({100*sum(missing_before.values())/(total_hours*len(pivot.columns)):.1f}%)")
 
+    # Fill ALL missing values (no limit) for network analysis compatibility
+    # Forward fill -> Backward fill -> Time-based interpolation for any remaining gaps
+    pivot = (pivot
+             .ffill()
+             .bfill()
+             .interpolate(method='time'))
+
+    # Verify no missing values remain after imputation
+    missing_after = pivot.isnull().sum().to_dict()
+    if sum(missing_after.values()) > 0:
+        print(f"WARNING: {sum(missing_after.values())} missing values remain after imputation!")
+    else:
+        print("✓ All missing values successfully imputed")
+    
     pivot.to_csv(output_dir / 'hourly_delays.csv')
+
+    # Calculate imputation statistics
+    imputation_stats = {}
+    for airport in pivot.columns:
+        original_count = total_hours - missing_before.get(airport, 0)
+        imputed_count = missing_before.get(airport, 0)
+        imputation_stats[airport] = {
+            'original_values': int(original_count),
+            'imputed_values': int(imputed_count),
+            'imputation_percentage': round(100 * imputed_count / total_hours, 2) if total_hours > 0 else 0
+        }
 
     quality_report = {
         'start_time': pivot.index.min().isoformat(),
         'end_time': pivot.index.max().isoformat(),
-        'total_hours': len(pivot),
-        'missing_values_before_interpolation': pivot.isnull().sum().to_dict(),
+        'total_hours': int(total_hours),
         'airports': pivot.columns.tolist(),
-        'mean_delays': pivot.mean().to_dict(),
-        'std_delays': pivot.std().to_dict()
+        'imputation_method': 'forward_fill -> backward_fill -> time_interpolation (all gaps filled)',
+        'missing_values_before_imputation': {k: int(v) for k, v in missing_before.items()},
+        'missing_values_after_imputation': {k: int(v) for k, v in missing_after.items()},
+        'imputation_statistics': imputation_stats,
+        'mean_delays': {k: round(v, 4) for k, v in pivot.mean().to_dict().items()},
+        'std_delays': {k: round(v, 4) for k, v in pivot.std().to_dict().items()}
     }
 
     with open(output_dir / 'timeseries_quality.json', 'w') as f:
