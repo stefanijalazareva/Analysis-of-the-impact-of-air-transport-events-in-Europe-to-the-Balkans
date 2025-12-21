@@ -50,30 +50,25 @@ def create_hourly_timeseries(df, output_dir):
                            aggfunc='mean')
             .resample('1h').mean())
 
-    # Track missing values before imputation
     missing_before = pivot.isnull().sum().to_dict()
     total_hours = len(pivot)
     
     print(f"Total hours in time series: {total_hours}")
     print(f"Missing values before imputation: {sum(missing_before.values())} ({100*sum(missing_before.values())/(total_hours*len(pivot.columns)):.1f}%)")
 
-    # Fill ALL missing values (no limit) for network analysis compatibility
-    # Forward fill -> Backward fill -> Time-based interpolation for any remaining gaps
     pivot = (pivot
              .ffill()
              .bfill()
              .interpolate(method='time'))
 
-    # Verify no missing values remain after imputation
     missing_after = pivot.isnull().sum().to_dict()
     if sum(missing_after.values()) > 0:
         print(f"WARNING: {sum(missing_after.values())} missing values remain after imputation!")
     else:
-        print("✓ All missing values successfully imputed")
+        print("All missing values successfully imputed")
     
     pivot.to_csv(output_dir / 'hourly_delays.csv')
 
-    # Calculate imputation statistics
     imputation_stats = {}
     for airport in pivot.columns:
         original_count = total_hours - missing_before.get(airport, 0)
@@ -143,7 +138,7 @@ def main():
         pandas.DataFrame: The processed hourly time series with airports as columns
     """
     print("Loading cleaned delay data...")
-    df = DataLoader().load_processed_data()  # Changed from load_cleaned_data to load_processed_data
+    df = DataLoader().load_processed_data()  
 
     output_dir = Path("data/TimeSeries")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -168,6 +163,5 @@ if __name__ == "__main__":
     ts = main()
 
     print("\nSummary Statistics:")
-    print("-------------------")
     print("\nMean delays by airport:")
     print(ts.mean().sort_values(ascending=False))

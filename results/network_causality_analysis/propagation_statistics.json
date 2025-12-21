@@ -1,0 +1,20 @@
+{
+  "europe_to_balkans": 99,
+  "balkans_to_europe": 100,
+  "within_europe": 90,
+  "within_balkans": 90,
+  "key_influencers": {
+    "BKPR": 19,
+    "EDDF": 19,
+    "EDDM": 19,
+    "EGKK": 19,
+    "EHAM": 19
+  },
+  "key_receivers": {
+    "BKPR": 19,
+    "EDDF": 19,
+    "EDDM": 19,
+    "EGKK": 19,
+    "EGLL": 19
+  }
+}
