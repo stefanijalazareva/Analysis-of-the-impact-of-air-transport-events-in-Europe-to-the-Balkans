@@ -66,6 +66,8 @@ class BurrXIIDeepAnalysis:
         
         # Parameter interpretations
         self.create_parameter_interpretation_plots(burr_pos, axes)
+
+        self.save_key_parameter_panels_pdf(burr_pos)
         
         # Regional analysis
         self.create_regional_parameter_analysis(burr_pos)
@@ -181,7 +183,8 @@ class BurrXIIDeepAnalysis:
             stat, p_value = stats.mannwhitneyu(europe_data[param], balkans_data[param], 
                                              alternative='two-sided')
             tests_results[param] = {'statistic': stat, 'p_value': p_value}
-        
+
+        self.save_violin_plots_pdf(burr_pos, tests_results)
         # Create regional comparison visualization
         fig, axes = plt.subplots(2, 3, figsize=(18, 12))
         fig.suptitle('Regional Differences in Burr XII Parameters', fontsize=16)
@@ -223,6 +226,120 @@ class BurrXIIDeepAnalysis:
             for param, result in tests_results.items():
                 significance = "Significant" if result['p_value'] < 0.05 else "Not Significant"
                 f.write(f"**{param}**: p-value = {result['p_value']:.6f} ({significance})\n")
+
+    def save_violin_plots_pdf(self, burr_pos, tests_results):
+        """
+        Save only the three violin plots (Shape_c, Shape_d, Scale)
+        as a single PDF figure for the paper.
+        """
+
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+        fig.suptitle(
+            'Regional Differences in Burr XII Parameters',
+            fontsize=14,
+            fontweight='bold'
+        )
+
+        parameters = ['Shape_c', 'Shape_d', 'Scale']
+
+        for i, param in enumerate(parameters):
+            sns.violinplot(
+                data=burr_pos,
+                x='Region',
+                y=param,
+                ax=axes[i],
+                inner='box'
+            )
+
+            axes[i].set_title(
+                f'{param}\np-value = {tests_results[param]["p_value"]:.4f}',
+                fontsize=11
+            )
+            axes[i].set_xlabel('')
+            axes[i].set_ylabel(param)
+
+            # Statistical annotation
+            if tests_results[param]['p_value'] < 0.05:
+                axes[i].text(
+                    0.5,
+                    axes[i].get_ylim()[1] * 0.95,
+                    'Significant difference',
+                    ha='center',
+                    color='red',
+                    fontsize=10,
+                    fontweight='bold'
+                )
+
+        plt.tight_layout()
+        plt.savefig(
+            self.output_path / 'burr_violin_parameters_by_region.pdf',
+            format='pdf',
+            bbox_inches='tight'
+        )
+        plt.close()
+
+    def save_key_parameter_panels_pdf(self, burr_pos):
+        """
+        Save selected key panels (Parameter c vs Tail Behavior,
+        Parameter d vs Variability, Parameter Correlation Matrix)
+        as a single PDF figure for the paper.
+        """
+
+        fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+        fig.suptitle(
+            'Key Burr XII Parameter Relationships',
+            fontsize=14,
+            fontweight='bold'
+        )
+
+        # --- Panel 1: Shape c vs Tail Heaviness ---
+        burr_pos['Tail_Heaviness'] = burr_pos['Data_P95'] / burr_pos['Data_Mean']
+
+        scatter = axes[0].scatter(
+            burr_pos['Shape_c'],
+            burr_pos['Tail_Heaviness'],
+            c=burr_pos['Sample_Size'],
+            cmap='viridis',
+            s=60,
+            alpha=0.7
+        )
+        axes[0].set_xlabel('Shape parameter c')
+        axes[0].set_ylabel('Tail heaviness (P95 / Mean)')
+        axes[0].set_title('Parameter c vs Tail Behavior')
+        plt.colorbar(scatter, ax=axes[0], label='Sample size')
+
+        # --- Panel 2: Shape d vs Variability ---
+        axes[1].scatter(
+            burr_pos['Shape_d'],
+            burr_pos['Data_Std'] / burr_pos['Data_Mean'],
+            c=['red' if r == 'Europe' else 'blue' for r in burr_pos['Region']],
+            s=60,
+            alpha=0.7
+        )
+        axes[1].set_xlabel('Shape parameter d')
+        axes[1].set_ylabel('Coefficient of variation')
+        axes[1].set_title('Parameter d vs Variability')
+
+        # --- Panel 3: Parameter Correlation Matrix ---
+        param_corr = burr_pos[['Shape_c', 'Shape_d', 'Scale',
+                               'Data_Mean', 'Data_Std']].corr()
+        sns.heatmap(
+            param_corr,
+            annot=True,
+            cmap='coolwarm',
+            center=0,
+            fmt='.2f',
+            ax=axes[2]
+        )
+        axes[2].set_title('Parameter Correlation Matrix')
+
+        plt.tight_layout()
+        plt.savefig(
+            self.output_path / 'burr_parameter_relationships.pdf',
+            format='pdf',
+            bbox_inches='tight'
+        )
+        plt.close()
 
     def analyze_tail_behavior(self, burr_pos):
         """Analyze tail behavior of Burr XII distribution"""

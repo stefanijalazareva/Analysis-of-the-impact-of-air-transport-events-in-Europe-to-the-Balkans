@@ -26,16 +26,37 @@ def load_all_distribution_results():
 
     return pd.concat(all_results, ignore_index=True)
 
+
 def create_ks_heatmap(data):
-    """Create a heatmap of KS statistics across airports and distributions."""
+    """Create a heatmap of KS statistics across airports and distributions,
+       including a final row with the median KS value per distribution."""
+
     pivot_ks = data.pivot(index='airport', columns='distribution', values='ks_statistic')
 
+    median_row = pivot_ks.median()
+    pivot_ks.loc['Median'] = median_row
+
     plt.figure(figsize=(12, 8))
-    sns.heatmap(pivot_ks, annot=True, fmt='.3f', cmap='YlOrRd')
+    sns.heatmap(
+        pivot_ks,
+        annot=True,
+        fmt='.3f',
+        cmap='YlOrRd',
+        cbar_kws={'label': 'KS statistic'}
+    )
+
     plt.title('KS Statistics Across Airports and Distributions')
+    plt.ylabel('Airport')
+    plt.xlabel('Distribution')
+
     plt.tight_layout()
-    plt.savefig('results/distribution_analysis/ks_test_heatmap.png')
+    plt.savefig(
+        'results/distribution_analysis/ks_test_heatmap.pdf',
+        format='pdf',
+        bbox_inches='tight'
+    )
     plt.close()
+
 
 def plot_ks_comparison(data):
     """Create a box plot comparing KS statistics across distributions."""
@@ -44,7 +65,11 @@ def plot_ks_comparison(data):
     plt.xticks(rotation=45)
     plt.title('Distribution of KS Statistics by Distribution Type')
     plt.tight_layout()
-    plt.savefig('results/distribution_analysis/ks_test_boxplot.png')
+    plt.savefig(
+        'results/distribution_analysis/ks_test_boxplot.pdf',
+        format='pdf',
+        bbox_inches='tight'
+    )
     plt.close()
 
 def generate_summary_table(data):

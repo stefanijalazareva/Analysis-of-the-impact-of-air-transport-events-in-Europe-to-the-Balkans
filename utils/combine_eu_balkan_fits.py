@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import norm, nct, kstest
 import warnings
+from scipy.stats import burr
 warnings.filterwarnings("ignore")
 
 def load_airport_data(airport_code):
@@ -37,6 +38,48 @@ def fit_distribution(data, dist_type="normal"):
         ks_stat, p_val = kstest(data, 'nct', args=params)
         return {'Distribution': 'Noncentral t', 'df': df_val, 'nc': nc, 'loc': loc, 'scale': scale,
                 'KS': ks_stat, 'p-value': p_val}
+
+def fit_burr_region(delays):
+    """
+    Fit Burr XII distribution on positive delays (in minutes)
+    """
+    # Convert to minutes
+    delays = delays / 60.0
+
+    # Keep only positive delays
+    pos = delays[delays > 0]
+
+    if len(pos) < 100:
+        print(" Not enough positive delay samples for Burr fit.")
+        return {
+            'Distribution': 'Burr XII',
+            'df': np.nan,
+            'nc': np.nan,
+            'loc': np.nan,
+            'scale': np.nan,
+            'c': np.nan,
+            'd': np.nan,
+            'KS': np.nan,
+            'p-value': np.nan
+        }
+
+    # Fit Burr XII
+    params = burr.fit(pos)
+    c, d, loc, scale = params
+
+    ks_stat, p_val = kstest(pos, burr.cdf, args=params)
+
+    return {
+        'Distribution': 'Burr XII',
+        'df': np.nan,
+        'nc': np.nan,
+        'loc': loc,
+        'scale': scale,
+        'c': c,
+        'd': d,
+        'KS': ks_stat,
+        'p-value': p_val
+    }
 
 def combine_all_delays():
     """Combine all delays from EU and Balkan airports."""
@@ -77,6 +120,12 @@ def analyze_and_compare():
     print("\n📈 Fitting Noncentral t distributions...")
     results.append({'Region': 'Europe', **fit_distribution(eu_delays, 'nct')})
     results.append({'Region': 'Balkans', **fit_distribution(balkan_delays, 'nct')})
+
+    # --- Fit Burr XII distribution ---
+    print("\n📈 Fitting Burr XII distributions...")
+
+    results.append({'Region': 'Europe', **fit_burr_region(eu_delays)})
+    results.append({'Region': 'Balkans', **fit_burr_region(balkan_delays)})
 
     # --- Save results to CSV ---
     df_results = pd.DataFrame(results)
