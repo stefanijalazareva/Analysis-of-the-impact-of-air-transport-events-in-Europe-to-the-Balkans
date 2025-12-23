@@ -12,15 +12,17 @@ from pathlib import Path
 
 class DataLoader:
     def __init__(self):
-        # Use absolute paths based on the script location
-        self.base_path = Path("C:/Stefanija/MANU/Statistical and information theory analysis of the impact of air transport events in Europe to the Balkans/AirTransportEvents")
+
+        self.base_path = Path(__file__).resolve().parents[1]
+
         self.raw_data_path = self.base_path / "data" / "RawData"
         self.processed_data_path = self.base_path / "data" / "ProcessedData"
 
-        print(f"Initialized DataLoader with:")
+        print("Initialized DataLoader with:")
         print(f"Base path: {self.base_path}")
         print(f"Raw data path: {self.raw_data_path}")
         print(f"Processed data path: {self.processed_data_path}")
+
 
     def get_available_airports(self) -> List[str]:
         """List all available airport codes from raw data files."""

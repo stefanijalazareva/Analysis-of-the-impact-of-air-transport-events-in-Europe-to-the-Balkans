@@ -1,0 +1,20 @@
+{
+  "nodes": 20,
+  "edges": 223,
+  "density": 0.5868421052631579,
+  "mean_degree": 22.3,
+  "top_out_degree_hubs": {
+    "LEBL": 16,
+    "EDDM": 15,
+    "EGKK": 15,
+    "EDDF": 14,
+    "LIRF": 14
+  },
+  "top_in_degree_hubs": {
+    "LEBL": 16,
+    "LWSK": 16,
+    "LEMD": 15,
+    "EIDW": 14,
+    "LATI": 14
+  }
+}
