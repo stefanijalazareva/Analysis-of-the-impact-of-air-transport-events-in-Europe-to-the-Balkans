@@ -1,0 +1,12 @@
+{
+  "mean_original": 0.6955879224502522,
+  "mean_detrended": -1.2042499619631966e-17,
+  "std_original": 5.138145299590252,
+  "std_detrended": 11.743051635338034,
+  "shape_original": [
+    73055
+  ],
+  "shape_detrended": [
+    73053
+  ]
+}

@@ -1,6 +1,6 @@
 {
-  "start_time": "2015-03-01T01:00:00+01:00",
-  "end_time": "2023-07-01T00:00:00+02:00",
+  "start_time": "2015-03-01T00:00:00",
+  "end_time": "2023-06-30T22:00:00",
   "total_hours": 73055,
   "airports": [
     "BKPR",
@@ -24,7 +24,8 @@
     "LWSK",
     "LYTV"
   ],
-  "imputation_method": "forward_fill -> backward_fill -> time_interpolation (all gaps filled)",
+  "imputation_method": "zero_fill (no flights = no delay)",
+  "interpretation": "Missing values represent hours with no scheduled flights",
   "missing_values_before_imputation": {
     "BKPR": 60650,
     "EDDF": 52645,
@@ -73,146 +74,191 @@
     "BKPR": {
       "original_values": 12405,
       "imputed_values": 60650,
-      "imputation_percentage": 83.02
+      "imputation_percentage": 83.02,
+      "active_hours": 12405,
+      "activity_percentage": 16.98
     },
     "EDDF": {
       "original_values": 20410,
       "imputed_values": 52645,
-      "imputation_percentage": 72.06
+      "imputation_percentage": 72.06,
+      "active_hours": 20410,
+      "activity_percentage": 27.94
     },
     "EDDM": {
       "original_values": 20894,
       "imputed_values": 52161,
-      "imputation_percentage": 71.4
+      "imputation_percentage": 71.4,
+      "active_hours": 20894,
+      "activity_percentage": 28.6
     },
     "EGKK": {
       "original_values": 21760,
       "imputed_values": 51295,
-      "imputation_percentage": 70.21
+      "imputation_percentage": 70.21,
+      "active_hours": 21760,
+      "activity_percentage": 29.79
     },
     "EGLL": {
       "original_values": 20383,
       "imputed_values": 52672,
-      "imputation_percentage": 72.1
+      "imputation_percentage": 72.1,
+      "active_hours": 20383,
+      "activity_percentage": 27.9
     },
     "EHAM": {
       "original_values": 23753,
       "imputed_values": 49302,
-      "imputation_percentage": 67.49
+      "imputation_percentage": 67.49,
+      "active_hours": 23753,
+      "activity_percentage": 32.51
     },
     "EIDW": {
       "original_values": 23038,
       "imputed_values": 50017,
-      "imputation_percentage": 68.46
+      "imputation_percentage": 68.46,
+      "active_hours": 23038,
+      "activity_percentage": 31.54
     },
     "LATI": {
       "original_values": 16062,
       "imputed_values": 56993,
-      "imputation_percentage": 78.01
+      "imputation_percentage": 78.01,
+      "active_hours": 16062,
+      "activity_percentage": 21.99
     },
     "LBBG": {
       "original_values": 9009,
       "imputed_values": 64046,
-      "imputation_percentage": 87.67
+      "imputation_percentage": 87.67,
+      "active_hours": 9009,
+      "activity_percentage": 12.33
     },
     "LBSF": {
       "original_values": 19631,
       "imputed_values": 53424,
-      "imputation_percentage": 73.13
+      "imputation_percentage": 73.13,
+      "active_hours": 19631,
+      "activity_percentage": 26.87
     },
     "LDDU": {
       "original_values": 9683,
       "imputed_values": 63372,
-      "imputation_percentage": 86.75
+      "imputation_percentage": 86.75,
+      "active_hours": 9683,
+      "activity_percentage": 13.25
     },
     "LDSP": {
       "original_values": 11139,
       "imputed_values": 61916,
-      "imputation_percentage": 84.75
+      "imputation_percentage": 84.75,
+      "active_hours": 11139,
+      "activity_percentage": 15.25
     },
     "LDZA": {
       "original_values": 16605,
       "imputed_values": 56450,
-      "imputation_percentage": 77.27
+      "imputation_percentage": 77.27,
+      "active_hours": 16605,
+      "activity_percentage": 22.73
     },
     "LEBL": {
       "original_values": 22902,
       "imputed_values": 50153,
-      "imputation_percentage": 68.65
+      "imputation_percentage": 68.65,
+      "active_hours": 22902,
+      "activity_percentage": 31.35
     },
     "LEMD": {
       "original_values": 23481,
       "imputed_values": 49574,
-      "imputation_percentage": 67.86
+      "imputation_percentage": 67.86,
+      "active_hours": 23481,
+      "activity_percentage": 32.14
     },
     "LFPG": {
       "original_values": 23769,
       "imputed_values": 49286,
-      "imputation_percentage": 67.46
+      "imputation_percentage": 67.46,
+      "active_hours": 23769,
+      "activity_percentage": 32.54
     },
     "LIRF": {
       "original_values": 22757,
       "imputed_values": 50298,
-      "imputation_percentage": 68.85
+      "imputation_percentage": 68.85,
+      "active_hours": 22757,
+      "activity_percentage": 31.15
     },
     "LQSA": {
       "original_values": 9458,
       "imputed_values": 63597,
-      "imputation_percentage": 87.05
+      "imputation_percentage": 87.05,
+      "active_hours": 9458,
+      "activity_percentage": 12.95
     },
     "LWSK": {
       "original_values": 12841,
       "imputed_values": 60214,
-      "imputation_percentage": 82.42
+      "imputation_percentage": 82.42,
+      "active_hours": 12841,
+      "activity_percentage": 17.58
     },
     "LYTV": {
       "original_values": 7422,
       "imputed_values": 65633,
-      "imputation_percentage": 89.84
+      "imputation_percentage": 89.84,
+      "active_hours": 7422,
+      "activity_percentage": 10.16
     }
   },
-  "mean_delays": {
-    "BKPR": 4.4193,
-    "EDDF": -4.4833,
-    "EDDM": -14.2484,
-    "EGKK": -1.8361,
-    "EGLL": -8.153,
-    "EHAM": 0.584,
-    "EIDW": -8.3089,
-    "LATI": -2.8783,
-    "LBBG": -0.4302,
-    "LBSF": -1.8887,
-    "LDDU": -2.3142,
-    "LDSP": 1.9344,
-    "LDZA": 6.0371,
-    "LEBL": -1.7011,
-    "LEMD": -4.0272,
-    "LFPG": -15.4237,
-    "LIRF": -7.9392,
-    "LQSA": 0.998,
-    "LWSK": -3.9606,
-    "LYTV": 0.2157
+  "mean_delays_minutes": {
+    "BKPR": 0.7258,
+    "EDDF": 0.7742,
+    "EDDM": 0.7217,
+    "EGKK": 2.7744,
+    "EGLL": 4.2233,
+    "EHAM": 2.9811,
+    "EIDW": 0.2039,
+    "LATI": 0.8025,
+    "LBBG": -0.0288,
+    "LBSF": -0.0972,
+    "LDDU": 0.3249,
+    "LDSP": 0.5192,
+    "LDZA": 0.5659,
+    "LEBL": 1.1692,
+    "LEMD": 1.4587,
+    "LFPG": 2.3093,
+    "LIRF": -0.5304,
+    "LQSA": 0.6956,
+    "LWSK": 0.2573,
+    "LYTV": 0.2709
   },
-  "std_delays": {
-    "BKPR": 13.3738,
-    "EDDF": 16.3464,
-    "EDDM": 83.4349,
-    "EGKK": 15.5177,
-    "EGLL": 72.6902,
-    "EHAM": 20.5995,
-    "EIDW": 13.4875,
-    "LATI": 12.1246,
-    "LBBG": 21.478,
-    "LBSF": 13.9012,
-    "LDDU": 12.7708,
-    "LDSP": 10.9333,
-    "LDZA": 13.3919,
-    "LEBL": 10.6324,
-    "LEMD": 15.0799,
-    "LFPG": 90.2052,
-    "LIRF": 11.2018,
-    "LQSA": 11.9775,
-    "LWSK": 17.1443,
-    "LYTV": 12.1184
+  "std_delays_minutes": {
+    "BKPR": 5.295,
+    "EDDF": 9.3949,
+    "EDDM": 6.7691,
+    "EGKK": 9.0264,
+    "EGLL": 14.2677,
+    "EHAM": 8.3782,
+    "EIDW": 6.4479,
+    "LATI": 5.224,
+    "LBBG": 5.9857,
+    "LBSF": 5.9359,
+    "LDDU": 4.3929,
+    "LDSP": 4.6347,
+    "LDZA": 4.7783,
+    "LEBL": 6.011,
+    "LEMD": 6.589,
+    "LFPG": 7.5366,
+    "LIRF": 5.8575,
+    "LQSA": 5.1382,
+    "LWSK": 5.7384,
+    "LYTV": 3.8502
+  },
+  "notes_for_network_analysis": {
+    "delay_file": "hourly_delays.csv - Use for Granger causality, transfer entropy",
+    "activity_file": "hourly_activity.csv - Use to filter analysis to active hours only",
+    "recommendation": "Consider conditional analysis: test causality only when both airports are active"
   }
 }
