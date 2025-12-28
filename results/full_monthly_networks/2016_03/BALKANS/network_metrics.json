@@ -1,0 +1,20 @@
+{
+  "nodes": 10,
+  "edges": 15,
+  "density": 0.16666666666666666,
+  "mean_degree": 3.0,
+  "top_out_degree_hubs": {
+    "LQSA": 3,
+    "LDZA": 3,
+    "LWSK": 2,
+    "BKPR": 2,
+    "LDSP": 2
+  },
+  "top_in_degree_hubs": {
+    "LYTV": 4,
+    "LBSF": 3,
+    "LWSK": 2,
+    "LQSA": 2,
+    "LATI": 2
+  }
+}

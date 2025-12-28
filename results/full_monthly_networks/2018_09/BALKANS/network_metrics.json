@@ -1,0 +1,20 @@
+{
+  "nodes": 10,
+  "edges": 34,
+  "density": 0.37777777777777777,
+  "mean_degree": 6.8,
+  "top_out_degree_hubs": {
+    "LQSA": 8,
+    "LYTV": 7,
+    "LDZA": 5,
+    "LDDU": 4,
+    "LATI": 4
+  },
+  "top_in_degree_hubs": {
+    "LBSF": 6,
+    "LBBG": 5,
+    "LYTV": 4,
+    "LQSA": 4,
+    "LDDU": 4
+  }
+}

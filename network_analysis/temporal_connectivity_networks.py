@@ -7,13 +7,16 @@ import json
 import logging
 import warnings
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
 
 warnings.filterwarnings("ignore")
 
-
-DETREND_METHOD = "zs"
-MAX_LAG = 24
-ALPHA = 0.05
+DETREND_METHOD = "z_score"
+MAX_LAG = 8
+BASE_ALPHA = 0.05
+ALPHA = BASE_ALPHA / MAX_LAG #Bonferroni correction
 
 MONTHS = [3, 6, 9, 12]
 YEARS = range(2015, 2025)
@@ -41,7 +44,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 def load_detrended_data():
-    path = Path(f"data/DetrendedData/detrended_{DETREND_METHOD}.parquet")
+    path = Path(f"data/Detrended/detrended_{DETREND_METHOD}.parquet")
     if not path.exists():
         raise FileNotFoundError("Detrended data not found.")
     df = pd.read_parquet(path)
@@ -59,7 +62,7 @@ def granger_connectivity(df, airports):
                 continue
 
             data = df[[tgt, src]].dropna()
-            if len(data) < 100:
+            if len(data) < 10 * MAX_LAG:
                 continue
 
             try:
@@ -87,6 +90,26 @@ def granger_connectivity(df, airports):
                 continue
 
     return adj, pd.DataFrame(edge_stats)
+
+def run_and_save_network(subset, airports, out_dir, label, year, month):
+    adj, edge_stats = granger_connectivity(subset, airports)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    adj.to_csv(out_dir / "adjacency_matrix.csv")
+    edge_stats.to_csv(out_dir / "edges_with_stats.csv", index=False)
+
+    metrics = compute_network_metrics(adj)
+    with open(out_dir / "network_metrics.json", "w") as f:
+        json.dump(metrics, f, indent=2)
+
+    visualize_network(
+        adj,
+        out_dir / "network.png",
+        title=f"{label} Delay Propagation Network {year}-{month:02d}"
+    )
+
+    return metrics
 
 
 
@@ -141,27 +164,72 @@ def visualize_network(adj_matrix, output_path, title):
         alpha=0.85
     )
 
+    edge_colors = []
+
+    for u, v in G.edges():
+        if u in EUROPE_AIRPORTS and v in BALKANS_AIRPORTS:
+            edge_colors.append("red")
+        elif u in BALKANS_AIRPORTS and v in EUROPE_AIRPORTS:
+            edge_colors.append("blue")
+        else:
+            edge_colors.append("gray")
+
     nx.draw_networkx_edges(
         G, pos,
         arrows=True,
-        arrowstyle="->",
-        arrowsize=15,
-        edge_color="gray",
-        alpha=0.4,
-        width=1.5
+        arrowstyle="-|>",
+        arrowsize=25,
+        edge_color=edge_colors,
+        alpha=0.85,
+        width=2.5,
+        min_source_margin=15,
+        min_target_margin=15
+    )
+
+    # ---------- LEGEND ----------
+    legend_elements = [
+        # Nodes
+        Patch(facecolor="#1f77b4", edgecolor="k", label="European airport"),
+        Patch(facecolor="#2ca02c", edgecolor="k", label="Balkan airport"),
+
+        # Edges
+        Line2D([0], [0], color="red", lw=2, label="Europe → Balkans"),
+        Line2D([0], [0], color="blue", lw=2, label="Balkans → Europe"),
+        Line2D([0], [0], color="gray", lw=2, label="Within region"),
+    ]
+
+    plt.legend(
+        handles=legend_elements,
+        loc="lower left",
+        fontsize=9,
+        frameon=True,
+        title="Legend",
+        title_fontsize=10
     )
 
     nx.draw_networkx_labels(G, pos, font_size=9)
 
     plt.title(title, fontsize=14, fontweight="bold")
     plt.axis("off")
-
     plt.tight_layout()
-    plt.savefig(output_path, dpi=300)
+
+    plt.savefig(output_path.with_suffix(".pdf"))
     plt.close()
 
+def save_temporal_csv(data, filename):
+    df = pd.DataFrame(data)
+    df["time"] = pd.to_datetime(
+        df["year"].astype(str) + "-" +
+        df["month"].astype(str).str.zfill(2) + "-01"
+    )
+    df = df.sort_values("time")
+    df.to_csv(OUTPUT_BASE / filename, index=False)
+
+
 def main():
-    temporal_metrics = []
+    temporal_full = []
+    temporal_europe = []
+    temporal_balkans = []
 
     logging.info("Starting FULL monthly connectivity network analysis")
 
@@ -183,57 +251,70 @@ def main():
             out_dir = OUTPUT_BASE / f"{year}_{month:02d}"
             out_dir.mkdir(parents=True, exist_ok=True)
 
-            # FULL NETWORK
-            adj, edge_stats = granger_connectivity(subset, ALL_AIRPORTS)
-            adj.to_csv(out_dir / "adjacency_matrix.csv")
-            edge_stats.to_csv(out_dir / "edges_with_stats.csv", index=False)
-
-            top_edges = edge_stats.sort_values("p_value").head(20)
-            top_edges.to_csv(out_dir / "top20_edges.csv", index=False)
-
-            metrics = compute_network_metrics(adj)
-            temporal_metrics.append({
-                "year": year,
-                "month": month,
-                "edges": metrics["edges"],
-                "density": metrics["density"],
-                "mean_degree": metrics["mean_degree"]
-            })
-
-            with open(out_dir / "network_metrics.json", "w") as f:
-                json.dump(metrics, f, indent=2)
-
-            visualize_network(
-                adj,
-                out_dir / "network.png",
-                title=f"Delay Propagation Network {year}-{month:02d}"
+            # 1. FULL network
+            full_dir = out_dir / "FULL"
+            metrics_full = run_and_save_network(
+                subset,
+                ALL_AIRPORTS,
+                full_dir,
+                "FULL",
+                year,
+                month
             )
 
-    tm = pd.DataFrame(temporal_metrics)
-    tm["time"] = pd.to_datetime(
-        tm["year"].astype(str) + "-" +
-        tm["month"].astype(str).str.zfill(2) + "-01"
-    )
-    tm = tm.sort_values("time")
-    tm.to_csv(OUTPUT_BASE / "temporal_metrics.csv", index=False)
+            # 2. EUROPE only network
+            eu_dir = out_dir / "EUROPE"
+            metrics_eu = run_and_save_network(
+                subset,
+                list(EUROPE_AIRPORTS),
+                eu_dir,
+                "EUROPE",
+                year,
+                month
+            )
 
-    # EDGE COUNT OVER TIME
-    plt.figure(figsize=(10, 4))
-    plt.plot(tm["time"], tm["edges"], marker="o")
-    plt.xticks(rotation=90)
-    plt.title("Number of edges over time")
-    plt.tight_layout()
-    plt.savefig(OUTPUT_BASE / "edges_over_time.png")
-    plt.close()
+            # 3. BALKANS only network
+            balkan_dir = out_dir / "BALKANS"
+            metrics_balkan = run_and_save_network(
+                subset,
+                list(BALKANS_AIRPORTS),
+                balkan_dir,
+                "BALKANS",
+                year,
+                month
+            )
 
-    # DENSITY OVER TIME
-    plt.figure(figsize=(10, 4))
-    plt.plot(tm["time"], tm["density"], marker="o", color="darkred")
-    plt.xticks(rotation=90)
-    plt.title("Network density over time")
-    plt.tight_layout()
-    plt.savefig(OUTPUT_BASE / "density_over_time.png")
-    plt.close()
+            # FULL
+            temporal_full.append({
+                "year": year,
+                "month": month,
+                "edges": metrics_full["edges"],
+                "density": metrics_full["density"],
+                "mean_degree": metrics_full["mean_degree"]
+            })
+
+            # EUROPE
+            temporal_europe.append({
+                "year": year,
+                "month": month,
+                "edges": metrics_eu["edges"],
+                "density": metrics_eu["density"],
+                "mean_degree": metrics_eu["mean_degree"]
+            })
+
+            # BALKANS
+            temporal_balkans.append({
+                "year": year,
+                "month": month,
+                "edges": metrics_balkan["edges"],
+                "density": metrics_balkan["density"],
+                "mean_degree": metrics_balkan["mean_degree"]
+            })
+
+    save_temporal_csv(temporal_full, "temporal_metrics_FULL.csv")
+    save_temporal_csv(temporal_europe, "temporal_metrics_EUROPE.csv")
+    save_temporal_csv(temporal_balkans, "temporal_metrics_BALKANS.csv")
+
 
     logging.info("ALL FULL MONTHLY NETWORKS GENERATED SUCCESSFULLY")
 
