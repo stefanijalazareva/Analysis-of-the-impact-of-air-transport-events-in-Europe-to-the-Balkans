@@ -3,6 +3,11 @@
   "edges": 213,
   "density": 0.5605263157894737,
   "mean_degree": 21.3,
+  "assortativity": -0.16814557188768334,
+  "modularity": 0.042779538252602986,
+  "n_communities": 3,
+  "transitivity": 0.6305237315875614,
+  "global_efficiency": 0.0,
   "top_out_degree_hubs": {
     "EDDF": 17,
     "EDDM": 16,

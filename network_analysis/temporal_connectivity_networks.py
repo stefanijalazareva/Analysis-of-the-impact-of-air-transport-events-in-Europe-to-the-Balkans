@@ -128,11 +128,49 @@ def compute_network_metrics(adj_matrix):
     top_out = sorted(out_deg.items(), key=lambda x: x[1], reverse=True)[:5]
     top_in = sorted(in_deg.items(), key=lambda x: x[1], reverse=True)[:5]
 
+    # Assortativity (degree correlation)
+    try:
+        assortativity = nx.degree_pearson_correlation_coefficient(G)
+    except (ValueError, ZeroDivisionError):
+        assortativity = None
+    
+    # Modularity (using Louvain communities)
+    try:
+        G_undirected = G.to_undirected()
+        if G_undirected.number_of_edges() > 0:
+            communities = nx.community.louvain_communities(G_undirected)
+            modularity = nx.community.modularity(G_undirected, communities)
+            n_communities = len(communities)
+        else:
+            modularity = None
+            n_communities = 0
+    except Exception as e:
+        logging.warning(f"Modularity calculation failed: {e}")
+        modularity = None
+        n_communities = None
+    
+    # Transitivity (global clustering coefficient)
+    try:
+        transitivity = nx.transitivity(G)
+    except:
+        transitivity = 0.0
+    
+    # Global Efficiency
+    try:
+        global_efficiency = nx.global_efficiency(G)
+    except:
+        global_efficiency = 0.0
+
     metrics = {
         "nodes": n_nodes,
         "edges": n_edges,
         "density": density,
         "mean_degree": mean_degree,
+        "assortativity": assortativity,
+        "modularity": modularity,
+        "n_communities": n_communities,
+        "transitivity": transitivity,
+        "global_efficiency": global_efficiency,
         "top_out_degree_hubs": dict(top_out),
         "top_in_degree_hubs": dict(top_in)
     }

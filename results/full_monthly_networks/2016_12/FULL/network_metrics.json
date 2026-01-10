@@ -3,6 +3,11 @@
   "edges": 124,
   "density": 0.3263157894736842,
   "mean_degree": 12.4,
+  "assortativity": -0.16248012145340168,
+  "modularity": 0.10639907440370236,
+  "n_communities": 3,
+  "transitivity": 0.39775051124744376,
+  "global_efficiency": 0.0,
   "top_out_degree_hubs": {
     "EHAM": 15,
     "LEBL": 12,

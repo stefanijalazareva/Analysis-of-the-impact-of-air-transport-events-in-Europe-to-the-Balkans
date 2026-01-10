@@ -3,6 +3,11 @@
   "edges": 76,
   "density": 0.2,
   "mean_degree": 7.6,
+  "assortativity": 0.010503477792065178,
+  "modularity": 0.20877966813694604,
+  "n_communities": 3,
+  "transitivity": 0.2543352601156069,
+  "global_efficiency": 0.0,
   "top_out_degree_hubs": {
     "LDZA": 11,
     "EDDM": 8,
