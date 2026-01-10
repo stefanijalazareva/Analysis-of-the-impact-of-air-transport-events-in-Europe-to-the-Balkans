@@ -9,16 +9,16 @@
   "transitivity": 0,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
-    "LDZA": 2,
     "LATI": 2,
+    "LDZA": 2,
     "LDSP": 2,
     "LYTV": 1,
     "BKPR": 1
   },
   "top_in_degree_hubs": {
-    "LYTV": 2,
     "LATI": 2,
     "LDDU": 2,
+    "LYTV": 2,
     "LBSF": 1,
     "LWSK": 1
   }

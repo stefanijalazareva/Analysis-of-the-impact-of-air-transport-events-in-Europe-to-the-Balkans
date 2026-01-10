@@ -3,23 +3,23 @@
   "edges": 59,
   "density": 0.6555555555555556,
   "mean_degree": 11.8,
-  "assortativity": -0.2648545633080691,
+  "assortativity": -0.264854563308069,
   "modularity": 0.0,
   "n_communities": 1,
   "transitivity": 0.7041420118343196,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
     "EDDF": 9,
-    "LFPG": 8,
     "EDDM": 8,
+    "LFPG": 8,
     "EHAM": 7,
     "EGKK": 6
   },
   "top_in_degree_hubs": {
     "LEBL": 9,
     "EGKK": 8,
-    "LEMD": 8,
     "EIDW": 8,
+    "LEMD": 8,
     "EGLL": 7
   }
 }

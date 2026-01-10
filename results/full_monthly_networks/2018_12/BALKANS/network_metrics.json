@@ -9,17 +9,17 @@
   "transitivity": 0.2631578947368421,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
-    "BKPR": 4,
     "LATI": 4,
     "LBBG": 4,
+    "BKPR": 4,
     "LYTV": 2,
-    "LDZA": 1
+    "LQSA": 1
   },
   "top_in_degree_hubs": {
     "LQSA": 4,
-    "LYTV": 3,
     "LDZA": 3,
     "LDDU": 3,
+    "LYTV": 3,
     "LATI": 2
   }
 }

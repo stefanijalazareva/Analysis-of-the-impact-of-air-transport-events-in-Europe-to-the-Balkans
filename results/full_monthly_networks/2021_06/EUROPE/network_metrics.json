@@ -11,15 +11,15 @@
   "top_out_degree_hubs": {
     "EHAM": 6,
     "LEMD": 5,
-    "LEBL": 4,
+    "EDDF": 4,
     "LFPG": 4,
-    "EDDF": 4
+    "LEBL": 4
   },
   "top_in_degree_hubs": {
     "LEMD": 7,
     "EGLL": 6,
-    "LEBL": 5,
     "EIDW": 5,
+    "LEBL": 5,
     "EHAM": 4
   }
 }

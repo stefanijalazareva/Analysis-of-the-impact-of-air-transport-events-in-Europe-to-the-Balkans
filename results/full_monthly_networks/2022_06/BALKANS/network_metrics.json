@@ -3,22 +3,22 @@
   "edges": 38,
   "density": 0.4222222222222222,
   "mean_degree": 7.6,
-  "assortativity": -0.14729212558258112,
+  "assortativity": -0.14729212558258115,
   "modularity": 0.02892561983471076,
   "n_communities": 2,
   "transitivity": 0.44047619047619047,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
-    "BKPR": 7,
     "LQSA": 7,
-    "LWSK": 6,
+    "BKPR": 7,
     "LDSP": 6,
+    "LWSK": 6,
     "LDDU": 5
   },
   "top_in_degree_hubs": {
-    "LDZA": 6,
     "LATI": 6,
     "LBSF": 6,
+    "LDZA": 6,
     "LDSP": 5,
     "BKPR": 4
   }

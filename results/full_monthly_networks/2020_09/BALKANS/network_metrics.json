@@ -11,15 +11,15 @@
   "top_out_degree_hubs": {
     "LYTV": 5,
     "LBSF": 3,
-    "LBBG": 3,
+    "LDSP": 3,
     "LDDU": 3,
-    "LDSP": 3
+    "LBBG": 3
   },
   "top_in_degree_hubs": {
     "LATI": 5,
     "LBSF": 4,
-    "LDDU": 3,
     "LDSP": 3,
+    "LDDU": 3,
     "LWSK": 2
   }
 }

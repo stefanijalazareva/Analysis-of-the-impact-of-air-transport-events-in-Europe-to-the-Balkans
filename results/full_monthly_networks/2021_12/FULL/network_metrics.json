@@ -3,9 +3,9 @@
   "edges": 111,
   "density": 0.29210526315789476,
   "mean_degree": 11.1,
-  "assortativity": -0.034535256502692714,
-  "modularity": 0.15910034602076123,
-  "n_communities": 2,
+  "assortativity": -0.03453525650269277,
+  "modularity": 0.1648442906574394,
+  "n_communities": 3,
   "transitivity": 0.4172661870503597,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {

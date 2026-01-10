@@ -10,16 +10,16 @@
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
     "LQSA": 5,
-    "BKPR": 4,
     "LBBG": 4,
+    "BKPR": 4,
     "LYTV": 3,
     "LBSF": 2
   },
   "top_in_degree_hubs": {
-    "LDZA": 5,
-    "LATI": 5,
     "LQSA": 5,
-    "LYTV": 2,
-    "LBBG": 2
+    "LATI": 5,
+    "LDZA": 5,
+    "LDSP": 2,
+    "LYTV": 2
   }
 }

@@ -9,8 +9,8 @@
   "transitivity": 0.3333333333333333,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
-    "LATI": 2,
     "LQSA": 2,
+    "LATI": 2,
     "LDSP": 2,
     "LDDU": 1,
     "LWSK": 1
@@ -18,8 +18,8 @@
   "top_in_degree_hubs": {
     "BKPR": 3,
     "LATI": 2,
-    "LBBG": 1,
+    "LQSA": 1,
     "LDDU": 1,
-    "LQSA": 1
+    "LBBG": 1
   }
 }

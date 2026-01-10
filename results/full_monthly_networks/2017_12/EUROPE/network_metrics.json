@@ -9,16 +9,16 @@
   "transitivity": 0.74,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
-    "LIRF": 8,
     "EDDF": 8,
+    "LIRF": 8,
     "EIDW": 8,
-    "EHAM": 7,
-    "EDDM": 7
+    "EDDM": 7,
+    "EHAM": 7
   },
   "top_in_degree_hubs": {
+    "EIDW": 9,
     "LEBL": 9,
     "LEMD": 9,
-    "EIDW": 9,
     "EGKK": 8,
     "EGLL": 7
   }

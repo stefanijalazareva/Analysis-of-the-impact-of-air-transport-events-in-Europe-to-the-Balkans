@@ -11,15 +11,15 @@
   "top_out_degree_hubs": {
     "LQSA": 9,
     "LATI": 8,
-    "LWSK": 8,
     "LDSP": 8,
-    "LYTV": 7
+    "LWSK": 8,
+    "LDZA": 7
   },
   "top_in_degree_hubs": {
-    "LDZA": 8,
     "LATI": 8,
     "LBSF": 8,
+    "LDZA": 8,
     "LBBG": 8,
-    "BKPR": 7
+    "LWSK": 7
   }
 }

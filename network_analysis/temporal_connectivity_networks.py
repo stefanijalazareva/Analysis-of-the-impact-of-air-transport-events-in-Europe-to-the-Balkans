@@ -130,7 +130,7 @@ def compute_network_metrics(adj_matrix):
 
     # Assortativity (degree correlation)
     try:
-        assortativity = nx.degree_pearson_correlation_coefficient(G)
+        assortativity = nx.algorithms.assortativity.degree_pearson_correlation_coefficient(G)
     except (ValueError, ZeroDivisionError):
         assortativity = None
     
@@ -138,8 +138,8 @@ def compute_network_metrics(adj_matrix):
     try:
         G_undirected = G.to_undirected()
         if G_undirected.number_of_edges() > 0:
-            communities = nx.community.louvain_communities(G_undirected)
-            modularity = nx.community.modularity(G_undirected, communities)
+            communities = nx.algorithms.community.louvain.louvain_communities(G_undirected)
+            modularity = nx.algorithms.community.quality.modularity(G_undirected, communities)
             n_communities = len(communities)
         else:
             modularity = None
@@ -151,13 +151,13 @@ def compute_network_metrics(adj_matrix):
     
     # Transitivity (global clustering coefficient)
     try:
-        transitivity = nx.transitivity(G)
+        transitivity = nx.algorithms.cluster.transitivity(G)
     except:
         transitivity = 0.0
     
     # Global Efficiency
     try:
-        global_efficiency = nx.global_efficiency(G)
+        global_efficiency = nx.algorithms.efficiency_measures.global_efficiency(G)
     except:
         global_efficiency = 0.0
 
