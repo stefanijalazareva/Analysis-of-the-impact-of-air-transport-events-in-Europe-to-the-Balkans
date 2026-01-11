@@ -3,7 +3,7 @@
   "edges": 103,
   "density": 0.2710526315789474,
   "mean_degree": 10.3,
-  "assortativity": -0.020636628390514365,
+  "assortativity": -0.02063662839051432,
   "modularity": 0.1786159169550173,
   "n_communities": 3,
   "transitivity": 0.3855932203389831,

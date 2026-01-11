@@ -13,13 +13,13 @@
     "LBBG": 4,
     "BKPR": 4,
     "LYTV": 3,
-    "LBSF": 2
+    "LDDU": 2
   },
   "top_in_degree_hubs": {
     "LQSA": 5,
-    "LATI": 5,
     "LDZA": 5,
-    "LDSP": 2,
-    "LYTV": 2
+    "LATI": 5,
+    "LYTV": 2,
+    "LBBG": 2
   }
 }

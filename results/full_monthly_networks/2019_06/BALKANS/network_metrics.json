@@ -3,7 +3,7 @@
   "edges": 61,
   "density": 0.6777777777777778,
   "mean_degree": 12.2,
-  "assortativity": -0.18840919789575977,
+  "assortativity": -0.18840919789575988,
   "modularity": 0.012820512820512775,
   "n_communities": 2,
   "transitivity": 0.7430167597765364,
@@ -12,14 +12,14 @@
     "LDSP": 9,
     "LDDU": 8,
     "BKPR": 8,
-    "LDZA": 7,
-    "LYTV": 7
+    "LYTV": 7,
+    "LDZA": 7
   },
   "top_in_degree_hubs": {
     "LDZA": 8,
     "BKPR": 8,
-    "LBSF": 7,
     "LDDU": 7,
+    "LBSF": 7,
     "LWSK": 7
   }
 }

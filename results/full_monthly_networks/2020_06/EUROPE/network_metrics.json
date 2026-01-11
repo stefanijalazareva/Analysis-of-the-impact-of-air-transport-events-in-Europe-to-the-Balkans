@@ -13,12 +13,12 @@
     "LFPG": 4,
     "EDDM": 3,
     "LEBL": 3,
-    "EGKK": 2
+    "LEMD": 2
   },
   "top_in_degree_hubs": {
     "EDDM": 5,
-    "LFPG": 4,
     "LIRF": 4,
+    "LFPG": 4,
     "LEBL": 3,
     "EDDF": 2
   }

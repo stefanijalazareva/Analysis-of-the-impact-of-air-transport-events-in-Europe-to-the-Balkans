@@ -10,13 +10,12 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-
 warnings.filterwarnings("ignore")
 
 DETREND_METHOD = "z_score"
 MAX_LAG = 8
 BASE_ALPHA = 0.05
-ALPHA = BASE_ALPHA / MAX_LAG #Bonferroni correction
+ALPHA = BASE_ALPHA / MAX_LAG  # Bonferroni correction
 
 MONTHS = [3, 6, 9, 12]
 YEARS = range(2015, 2025)
@@ -74,10 +73,8 @@ def granger_connectivity(df, airports):
                 min_p = np.min(pvals)
                 best_lag = pvals.index(min_p) + 1
 
-
                 if min_p < ALPHA:
                     adj.loc[src, tgt] = 1
-
 
                 edge_stats.append({
                     "source": src,
@@ -90,6 +87,7 @@ def granger_connectivity(df, airports):
                 continue
 
     return adj, pd.DataFrame(edge_stats)
+
 
 def run_and_save_network(subset, airports, out_dir, label, year, month):
     adj, edge_stats = granger_connectivity(subset, airports)
@@ -112,7 +110,6 @@ def run_and_save_network(subset, airports, out_dir, label, year, month):
     return metrics
 
 
-
 def compute_network_metrics(adj_matrix):
     G = nx.from_pandas_adjacency(adj_matrix, create_using=nx.DiGraph)
 
@@ -133,7 +130,7 @@ def compute_network_metrics(adj_matrix):
         assortativity = nx.algorithms.assortativity.degree_pearson_correlation_coefficient(G)
     except (ValueError, ZeroDivisionError):
         assortativity = None
-    
+
     # Modularity (using Louvain communities)
     try:
         G_undirected = G.to_undirected()
@@ -148,13 +145,13 @@ def compute_network_metrics(adj_matrix):
         logging.warning(f"Modularity calculation failed: {e}")
         modularity = None
         n_communities = None
-    
+
     # Transitivity (global clustering coefficient)
     try:
         transitivity = nx.algorithms.cluster.transitivity(G)
     except:
         transitivity = 0.0
-    
+
     # Global Efficiency
     try:
         global_efficiency = nx.algorithms.efficiency_measures.global_efficiency(G)
@@ -176,6 +173,7 @@ def compute_network_metrics(adj_matrix):
     }
 
     return metrics
+
 
 def visualize_network(adj_matrix, output_path, title):
     G = nx.from_pandas_adjacency(adj_matrix, create_using=nx.DiGraph)
@@ -254,6 +252,7 @@ def visualize_network(adj_matrix, output_path, title):
     plt.savefig(output_path.with_suffix(".pdf"))
     plt.close()
 
+
 def save_temporal_csv(data, filename):
     df = pd.DataFrame(data)
     df["time"] = pd.to_datetime(
@@ -280,7 +279,7 @@ def main():
             subset = df[
                 (df.index.year == year) &
                 (df.index.month == month)
-            ]
+                ]
 
             if len(subset) < 300:
                 logging.warning("Not enough data, skipping")
@@ -322,39 +321,56 @@ def main():
                 month
             )
 
-            # FULL
             temporal_full.append({
                 "year": year,
                 "month": month,
                 "edges": metrics_full["edges"],
                 "density": metrics_full["density"],
-                "mean_degree": metrics_full["mean_degree"]
+                "mean_degree": metrics_full["mean_degree"],
+                "assortativity": metrics_full["assortativity"],
+                "transitivity": metrics_full["transitivity"],
+                "global_efficiency": metrics_full["global_efficiency"],
+                "modularity": metrics_full["modularity"],
+                "num_communities": metrics_full["n_communities"],
             })
 
-            # EUROPE
             temporal_europe.append({
                 "year": year,
                 "month": month,
                 "edges": metrics_eu["edges"],
                 "density": metrics_eu["density"],
-                "mean_degree": metrics_eu["mean_degree"]
+                "mean_degree": metrics_eu["mean_degree"],
+                "assortativity": metrics_eu["assortativity"],
+                "transitivity": metrics_eu["transitivity"],
+                "global_efficiency": metrics_eu["global_efficiency"],
+                "modularity": metrics_eu["modularity"],
+                "num_communities": metrics_eu["n_communities"],
             })
 
-            # BALKANS
             temporal_balkans.append({
                 "year": year,
                 "month": month,
                 "edges": metrics_balkan["edges"],
                 "density": metrics_balkan["density"],
-                "mean_degree": metrics_balkan["mean_degree"]
+                "mean_degree": metrics_balkan["mean_degree"],
+                "assortativity": metrics_balkan["assortativity"],
+                "transitivity": metrics_balkan["transitivity"],
+                "global_efficiency": metrics_balkan["global_efficiency"],
+                "modularity": metrics_balkan["modularity"],
+                "num_communities": metrics_balkan["n_communities"],
             })
 
     save_temporal_csv(temporal_full, "temporal_metrics_FULL.csv")
     save_temporal_csv(temporal_europe, "temporal_metrics_EUROPE.csv")
     save_temporal_csv(temporal_balkans, "temporal_metrics_BALKANS.csv")
 
-
     logging.info("ALL FULL MONTHLY NETWORKS GENERATED SUCCESSFULLY")
+
 
 if __name__ == "__main__":
     main()
+
+
+
+
+

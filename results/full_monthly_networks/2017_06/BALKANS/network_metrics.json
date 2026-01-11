@@ -12,14 +12,14 @@
     "LYTV": 9,
     "LQSA": 8,
     "LDZA": 8,
-    "LATI": 6,
-    "LDSP": 6
+    "LDDU": 6,
+    "LATI": 6
   },
   "top_in_degree_hubs": {
     "LBSF": 8,
-    "LDSP": 7,
     "LWSK": 7,
+    "LDSP": 7,
     "LQSA": 5,
-    "LATI": 5
+    "LDDU": 5
   }
 }

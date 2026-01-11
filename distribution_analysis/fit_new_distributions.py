@@ -1,5 +1,6 @@
 """
 Fit positive-support distributions on POSITIVE flight delays only:
+Normal, NCT, Lognormal, Gamma,
 Burr XII, Generalized Gamma, Lomax, Inverse Gaussian, Exponential
 
 Results are saved to distribution_comparison.csv per airport
@@ -10,16 +11,19 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy import stats
-from scipy.stats import burr12, gengamma, lomax, invgauss, expon
+from scipy.stats import burr12, gengamma, lomax, invgauss, expon,norm,nct,lognorm,gamma
 from tqdm import tqdm
 import warnings
 from pandas.errors import EmptyDataError
 warnings.filterwarnings("ignore")
 
-# -------------------------------------------------
+
 # CONFIG
-# -------------------------------------------------
 DISTRIBUTIONS = {
+    "normal": norm,
+    "nct": nct,
+    "lognorm": lognorm,
+    "gamma": gamma,
     "burr12": burr12,
     "gengamma": gengamma,
     "lomax": lomax,
@@ -27,24 +31,35 @@ DISTRIBUTIONS = {
     "expon": expon,
 }
 
-MIN_SAMPLES = 100  # same logic as colleague
+MIN_SAMPLES = 100
 
-
-# -------------------------------------------------
-# HELPERS
-# -------------------------------------------------
-def load_positive_delays(airport_code):
-    """Load and return POSITIVE delays in minutes."""
+def load_all_delays_minutes(airport_code):
     path = Path("data/RawData") / f"Delays_{airport_code}.npy"
     raw = np.load(path, allow_pickle=True)
 
-    delays = raw[:, 3].astype(float)
-    pos_delays = delays[delays > 0] / 60.0  # minutes
+    delays_sec = raw[:, 3].astype(float)
+    delays_min = delays_sec / 60.0
 
-    return pos_delays
+    return delays_min
+
+def load_positive_delays_minutes(airport_code):
+    path = Path("data/RawData") / f"Delays_{airport_code}.npy"
+    raw = np.load(path, allow_pickle=True)
+
+    delays_sec = raw[:, 3].astype(float)
+    delays_min = delays_sec[delays_sec > 0] / 60.0
+
+    return delays_min
+
+SIGNED_DISTS = {"normal", "nct"}
+POSITIVE_DISTS = {
+    "lognorm", "gamma",
+    "burr12", "gengamma", "lomax", "invgauss", "expon"
+}
 
 
-def fit_distribution(dist, data):
+
+def fit_distribution(dist_name,dist, data):
     """Fit distribution and compute LL, AIC, KS."""
     params = dist.fit(data)
 
@@ -57,31 +72,43 @@ def fit_distribution(dist, data):
     return params, loglik, aic, ks_stat, p_value
 
 
-# -------------------------------------------------
-# MAIN ANALYSIS
-# -------------------------------------------------
-def analyze_airport(airport_code):
-    delays = load_positive_delays(airport_code)
 
-    if len(delays) < MIN_SAMPLES:
-        print(f"{airport_code}: not enough positive delays ({len(delays)})")
-        return None
+# MAIN ANALYSIS
+def analyze_airport(airport_code):
+    delays_all = load_all_delays_minutes(airport_code)
+    delays_pos = load_positive_delays_minutes(airport_code)
 
     results = []
 
     for name, dist in DISTRIBUTIONS.items():
         try:
-            params, loglik, aic, ks_stat, p_value = fit_distribution(dist, delays)
+            if name in SIGNED_DISTS:
+                data = delays_all
+            else:
+                data = delays_pos
+
+            if len(data) < MIN_SAMPLES:
+                continue
+
+
+            params = dist.fit(data)
+
+            loglik = np.sum(dist.logpdf(data, *params))
+            k = len(params)
+            aic = 2 * k - 2 * loglik
+            ks_stat, p_value = stats.kstest(data, dist.cdf, args=params)
 
             results.append({
                 "airport": airport_code,
                 "distribution": name,
-                "n_samples": len(delays),
+                "n_samples": len(data),
                 "log_likelihood": loglik,
                 "aic": aic,
                 "ks_statistic": ks_stat,
                 "p_value": p_value,
-                "parameters": str(params)
+                "parameters": str(params),
+                "data_support": "signed" if name in SIGNED_DISTS else "positive",
+                "units": "minutes"
             })
 
         except Exception as e:
@@ -89,31 +116,12 @@ def analyze_airport(airport_code):
 
     return pd.DataFrame(results)
 
-def save_results(df_new, airport_code):
-
-    KEEP = {"normal", "nct", "lognorm", "gamma"}
-
+def save_results(df, airport_code):
     out_dir = Path("results/distribution_analysis") / airport_code
     out_dir.mkdir(parents=True, exist_ok=True)
-    file = out_dir / "distribution_comparison.csv"
 
-    if file.exists():
-        try:
-            old = pd.read_csv(file)
-
-            if "distribution" not in old.columns:
-                raise EmptyDataError
-
-            old_keep = old[old["distribution"].isin(KEEP)]
-            merged = pd.concat([old_keep, df_new], ignore_index=True)
-
-        except EmptyDataError:
-            # file exists but is empty or broken
-            merged = df_new
-    else:
-        merged = df_new
-
-    merged.to_csv(file, index=False)
+    file = out_dir / "distribution_comparison_new.csv"
+    df.to_csv(file, index=False)
 
 def main():
     data_dir = Path("data/RawData")
@@ -132,3 +140,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

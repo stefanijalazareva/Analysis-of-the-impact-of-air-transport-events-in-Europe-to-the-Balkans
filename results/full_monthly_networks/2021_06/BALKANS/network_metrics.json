@@ -13,13 +13,13 @@
     "LQSA": 3,
     "LDZA": 3,
     "LWSK": 3,
-    "LDSP": 2
+    "LDDU": 2
   },
   "top_in_degree_hubs": {
-    "LBSF": 4,
     "LYTV": 4,
-    "LDSP": 3,
+    "LBSF": 4,
     "LWSK": 3,
+    "LDSP": 3,
     "LQSA": 2
   }
 }

@@ -35,59 +35,93 @@ plt.rcParams.update({
     "legend.fontsize": 10,
 })
 
+def plot_temporal_with_scatter(metric, ylabel, title, filename):
+    fig, axes = plt.subplots(
+        ncols=2,
+        figsize=(13, 5),
+        gridspec_kw={"width_ratios": [3, 1]}
+    )
 
-# 1. EDGES OVER TIME
-plt.figure(figsize=(10, 5))
+    ax_ts, ax_scatter = axes
 
-for name, df in data.items():
-    plt.plot(df["time"], df["edges"], marker="o", label=name)
+    # ---- LEFT: time evolution ----
+    for name, df in data.items():
+        ax_ts.plot(df["time"], df[metric], marker="o", label=name)
 
+    ax_ts.set_title(title)
+    ax_ts.set_xlabel("Time")
+    ax_ts.set_ylabel(ylabel)
+    ax_ts.grid(alpha=0.3)
+    ax_ts.legend()
 
-plt.title("Number of Edges Over Time")
-plt.xlabel("Time")
-plt.ylabel("Edges")
-plt.legend()
-plt.grid(alpha=0.3)
-plt.tight_layout()
+    # ---- RIGHT: EU vs BALKANS scatter ----
+    eu = data["EUROPE"][metric]
+    balkans = data["BALKANS"][metric]
 
-plt.savefig(OUTPUT_DIR / "edges_comparison.pdf")
-plt.close()
+    ax_scatter.scatter(eu, balkans, alpha=0.8)
+    ax_scatter.set_xlabel("Europe")
+    ax_scatter.set_ylabel("Balkans")
+    ax_scatter.set_title("EU vs Balkans")
 
+    # Identity line
+    min_val = min(eu.min(), balkans.min())
+    max_val = max(eu.max(), balkans.max())
+    ax_scatter.plot([min_val, max_val], [min_val, max_val], "r--", alpha=0.6)
 
-# 2. DENSITY OVER TIME
-plt.figure(figsize=(10, 5))
+    ax_scatter.grid(alpha=0.3)
 
-for name, df in data.items():
-    plt.plot(df["time"], df["density"], marker="o", label=name)
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / filename)
+    plt.close()
 
+plot_temporal_with_scatter(
+    metric="edges",
+    ylabel="Edges",
+    title="Number of Edges Over Time",
+    filename="edges_comparison_with_scatter.pdf"
+)
 
-plt.title("Network Density Over Time")
-plt.xlabel("Time")
-plt.ylabel("Density")
-plt.legend()
-plt.grid(alpha=0.3)
-plt.tight_layout()
+plot_temporal_with_scatter(
+    metric="density",
+    ylabel="Density",
+    title="Network Density Over Time",
+    filename="density_comparison_with_scatter.pdf"
+)
 
-plt.savefig(OUTPUT_DIR / "density_comparison.pdf")
-plt.close()
+plot_temporal_with_scatter(
+    metric="mean_degree",
+    ylabel="Mean Degree",
+    title="Mean Degree Over Time",
+    filename="mean_degree_comparison_with_scatter.pdf"
+)
 
+plot_temporal_with_scatter(
+    metric="assortativity",
+    ylabel="Assortativity",
+    title="Degree Assortativity Over Time",
+    filename="assortativity_comparison_with_scatter.pdf"
+)
 
-# 3. MEAN DEGREE OVER TIME
-plt.figure(figsize=(10, 5))
+plot_temporal_with_scatter(
+    metric="transitivity",
+    ylabel="Transitivity",
+    title="Transitivity Over Time",
+    filename="transitivity_comparison_with_scatter.pdf"
+)
 
-for name, df in data.items():
-    plt.plot(df["time"], df["mean_degree"], marker="o", label=name)
+plot_temporal_with_scatter(
+    metric="global_efficiency",
+    ylabel="Global Efficiency",
+    title="Global Efficiency Over Time",
+    filename="efficiency_comparison_with_scatter.pdf"
+)
 
-
-plt.title("Mean Degree Over Time")
-plt.xlabel("Time")
-plt.ylabel("Mean Degree")
-plt.legend()
-plt.grid(alpha=0.3)
-plt.tight_layout()
-
-plt.savefig(OUTPUT_DIR / "mean_degree_comparison.pdf")
-plt.close()
+plot_temporal_with_scatter(
+    metric="modularity",
+    ylabel="Modularity",
+    title="Modularity Over Time",
+    filename="modularity_comparison_with_scatter.pdf"
+)
 
 
 # ASSORTATIVITY OVER TIME

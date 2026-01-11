@@ -4,8 +4,8 @@
   "density": 0.2111111111111111,
   "mean_degree": 3.8,
   "assortativity": -0.25823359156705405,
-  "modularity": 0.15743944636678195,
-  "n_communities": 3,
+  "modularity": 0.1505190311418685,
+  "n_communities": 2,
   "transitivity": 0.21428571428571427,
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
@@ -18,8 +18,8 @@
   "top_in_degree_hubs": {
     "LQSA": 4,
     "LDSP": 4,
-    "LWSK": 3,
     "LBBG": 3,
-    "LATI": 2
+    "LWSK": 3,
+    "LDDU": 2
   }
 }

@@ -25,14 +25,14 @@ from scipy.stats import ks_2samp
 
 # Load Burr XII CI summary
 
-burr_path = "results/burr_analysis/burr_ci_summary.csv"
-nct_path = "results/NCT_confidence_intervals_results/bootstrap_CI_all_airports.csv"
+burr_path = "../results/burr_analysis/burr_ci_summary.csv"
+nct_path = "../results/NCT_confidence_intervals_results/bootstrap_CI_all_airports.csv"
 
 df_burr = pd.read_csv(burr_path)
 df_nct = pd.read_csv(nct_path)
 
 # Output directory
-outdir = Path("results/NCT_vs_Burr_CI_comparison")
+outdir = Path("../results/NCT_vs_Burr_CI_comparison")
 outdir.mkdir(parents=True, exist_ok=True)
 
 # Regions
@@ -112,18 +112,45 @@ plt.close()
 
 
 # 6. Visualization 3: Europe vs Balkans Comparison
+# 6. UPDATED Visualization: Faceted CI Width Comparison (PDF)
 
+parameters = [
+    "Burr_c", "Burr_d", "Burr_loc", "Burr_scale",
+    "NCT_df", "NCT_nc", "NCT_loc", "NCT_scale"
+]
 
-region_plot = combined.melt(id_vars=["Airport","Region"],
-                            var_name="Parameter", value_name="CI_Width")
+n_cols = 2
+n_rows = int(np.ceil(len(parameters) / n_cols))
 
-plt.figure(figsize=(14,7))
-sns.boxplot(data=region_plot, x="Parameter", y="CI_Width", hue="Region")
-plt.title("Europe vs Balkans – CI Width Comparison (Burr XII + NCT)")
-plt.xticks(rotation=45)
-plt.legend()
-plt.tight_layout()
-plt.savefig(outdir / "ci_europe_vs_balkans.png", dpi=300)
+fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 3 * n_rows))
+axes = axes.flatten()
+
+for ax, param in zip(axes, parameters):
+    sns.boxplot(
+        data=combined,
+        x="Region",
+        y=param,
+        hue="Region",
+        palette=["steelblue", "darkorange"],
+        legend=False,
+        ax=ax
+    )
+    ax.set_title(param)
+    ax.set_ylabel("CI Width")
+    ax.set_xlabel("")
+
+for i in range(len(parameters), len(axes)):
+    fig.delaxes(axes[i])
+
+fig.suptitle(
+    "Europe vs Balkans – CI Width Comparison per Parameter\n(Burr XII & NCT)",
+    fontsize=14
+)
+
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+output_path = outdir / "ci_europe_vs_balkans.pdf"
+plt.savefig(output_path, format="pdf", bbox_inches="tight")
 plt.close()
 
 

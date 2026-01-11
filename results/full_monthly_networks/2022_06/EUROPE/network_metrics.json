@@ -10,15 +10,15 @@
   "global_efficiency": 0.0,
   "top_out_degree_hubs": {
     "EDDM": 8,
-    "EGLL": 7,
-    "LFPG": 7,
     "LIRF": 7,
-    "EGKK": 6
+    "LFPG": 7,
+    "EGLL": 7,
+    "EIDW": 6
   },
   "top_in_degree_hubs": {
+    "LEMD": 9,
     "EIDW": 9,
     "LEBL": 9,
-    "LEMD": 9,
     "EGKK": 7,
     "EGLL": 7
   }

@@ -3,8 +3,8 @@
   "edges": 14,
   "density": 0.15555555555555556,
   "mean_degree": 2.8,
-  "assortativity": -0.16666666666666666,
-  "modularity": 0.21428571428571427,
+  "assortativity": -0.16666666666666669,
+  "modularity": 0.22448979591836735,
   "n_communities": 3,
   "transitivity": 0,
   "global_efficiency": 0.0,
@@ -13,13 +13,13 @@
     "LQSA": 2,
     "LDZA": 2,
     "LWSK": 2,
-    "LBSF": 1
+    "LYTV": 1
   },
   "top_in_degree_hubs": {
-    "LBSF": 2,
-    "LDZA": 2,
-    "LDSP": 2,
     "LYTV": 2,
-    "LQSA": 1
+    "LDZA": 2,
+    "LBSF": 2,
+    "LDSP": 2,
+    "LBBG": 1
   }
 }

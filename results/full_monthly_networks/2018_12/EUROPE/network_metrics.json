@@ -12,14 +12,14 @@
     "EDDM": 9,
     "EDDF": 8,
     "EHAM": 8,
-    "EGLL": 7,
+    "LIRF": 7,
     "LFPG": 7
   },
   "top_in_degree_hubs": {
     "LEBL": 9,
-    "EGKK": 8,
     "EIDW": 8,
+    "EGKK": 8,
     "LFPG": 7,
-    "EDDM": 6
+    "EDDF": 6
   }
 }
