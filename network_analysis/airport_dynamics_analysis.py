@@ -3,6 +3,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pathlib import Path
 import re
+import matplotlib.colors as mcolors
+
 
 # CONFIG
 BASE_DIR = Path("results/full_monthly_networks")
@@ -190,8 +192,10 @@ pivot_out = (hm_out
 pivot_out = pivot_out.reindex(AIRPORT_ORDER)
 
 plt.figure(figsize=(16, 9))
-plt.imshow(pivot_out, aspect="auto")
+norm_out = mcolors.PowerNorm(gamma=0.5, vmin=0, vmax=pivot_out.to_numpy().max())
+plt.imshow(pivot_out, aspect="auto", cmap="Reds", norm=norm_out)
 plt.colorbar(label="Out-degree (monthly)")
+
 
 # y labels
 plt.yticks(range(len(pivot_out.index)), pivot_out.index)
@@ -222,12 +226,14 @@ pivot_in = (hm_in
 pivot_in = pivot_in.reindex(AIRPORT_ORDER)
 
 plt.figure(figsize=(16, 9))
-plt.imshow(pivot_in, aspect="auto")
+norm_in = mcolors.PowerNorm(gamma=0.5, vmin=0, vmax=pivot_in.to_numpy().max())
+plt.imshow(pivot_in, aspect="auto", cmap="Reds", norm=norm_in)
 plt.colorbar(label="In-degree (monthly)")
+
 
 plt.yticks(range(len(pivot_in.index)), pivot_in.index)
 
-times = pivot_out.columns.sort_values()
+times = pivot_in.columns.sort_values()
 xticks = list(range(len(times)))
 xticklabels = [t.strftime("%Y-%m") for t in times]
 plt.xticks(xticks, xticklabels, rotation=90, fontsize=7)
